@@ -5,3 +5,7 @@
 # Ignore object files
 *.obj
 *.OBJ
+
+# Ignore COM files
+*.com
+*.COM
