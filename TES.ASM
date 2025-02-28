@@ -116,7 +116,13 @@ MAIN PROC FAR
 
     ASSUME CS:CODE, DS:DATA, SS:STACK    
     MOV AX, DATA                         
-    MOV DS, AX                                                          
+    MOV DS, AX   
+
+    MOV AX, 13h       ; Set VGA Mode 13h (320x200, 256 colors)
+    INT 10h           ; Call BIOS
+
+    MOV AX, 0A000h    ; Load VGA memory segment
+    MOV ES, AX        ; Set ES to point to VGA memory                        
     
     
     GameLoop:
@@ -147,21 +153,13 @@ MAIN PROC FAR
 MAIN ENDP
 
 RESET PROC
-    MOV AH, 00h                          ; set the configuration to video mode
-    MOV AL, 13h                          ; choose the video mode
-    INT 10h                              ; execute the configuration
+    MOV DI, 0         
+    MOV AX, 0         
+    MOV CX, 32000     
 
-    MOV AH, 0Bh                          ; set the configuration
-    MOV BH, 00h                          ; to the background color
-    MOV BL, 00h                          ; choose black as background color
-    INT 10h                              ; execute the configuration
+    REP STOSW         
 
-    MOV AH, 0Ch                          ; set the configuration to writing a pixel
-    MOV AL, 0Fh                          ; choose white as color
-    MOV BH, 00h                          ; set the page number
-    
-
-    RET
+    RET 
 RESET ENDP
 
 INPUT PROC
@@ -251,12 +249,23 @@ DRAWSPRITE PROC
             sub dx, Siz
 
             add cx, SPRITEPOINTERX
-            add dx, SPRITEPOINTERY
+            CMP CX, 320
+            JGE zero  
+            CMP CX, 0
+            JLE zero 
 
-            MOV AH, 0Ch                          
-            MOV AL, 0Fh                          
-            MOV BH, 00h                          
-            int 10h
+            add dx, SPRITEPOINTERY
+  
+            MOV AX, 320        
+            MUL DX             
+            ADD AX, CX         
+            MOV DI, AX         
+            MOV AL, 00h        
+            MOV BYTE PTR ES:[DI], AL  
+
+
+            MOV AL, 0Fh        
+            MOV BYTE PTR ES:[DI], AL  
 
             zero:
             
@@ -346,7 +355,7 @@ TILEMAPEDITOR PROC
     mov ax, 0
     mov bx, 0
     mov dx, 0
-    mov cx, 20
+    mov cx, 21
 
     mov TILEPOINTERX, 0
     mov TILEPOINTERY, 0 
