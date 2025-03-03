@@ -153,7 +153,12 @@ MAIN PROC FAR
     MOV AX, 0A000h    ; Load VGA memory segment
     MOV ES, AX        ; Set ES to point to VGA memory                        
     
+    call GAMECYCLE
     
+    RET
+MAIN ENDP
+
+GAMECYCLE PROC
     GameLoop:
         inc Frame
         mov ah, 00h   
@@ -175,8 +180,8 @@ MAIN PROC FAR
         jmp checkTime
 
     jmp GameLoop
-    RET
-MAIN ENDP
+GAMECYCLE ENDP
+
 
 RESET PROC
     MOV DI, 0         
@@ -276,9 +281,11 @@ JUMPINPUT ENDP
 
 PHYSICSUPDATE PROC
     
+
     mov ax, GRAVITY
     add SYSRA_Y, ax
     
+
     call JUMPINPUT
     
     call COLLISIONDEDECTION
@@ -526,13 +533,13 @@ COLLISIONDEDECTION PROC
 
     mov cx, SYSRA_X
     mov dx, SYSRA_Y
-    sub dx, 16
+    sub dx, 14
 
     mov Obj_X, cx
     mov Obj_Y, dx
    
     mov bx, 0
-    mov cx, 16
+    mov cx, 14
     COLLUPDW:
         push cx
         mov cx, Obj_X
@@ -562,13 +569,13 @@ COLLISIONDEDECTION PROC
     mov cx, SYSRA_X
     mov dx, SYSRA_Y
     sub dx, 8
-    sub cx, 10 
+    sub cx, 8 
 
     mov Obj_X, cx
     mov Obj_Y, dx
 
     mov bx, 0
-    mov cx, 20
+    mov cx, 16
     COLLSIDE:
         push cx
         mov cx, Obj_X
