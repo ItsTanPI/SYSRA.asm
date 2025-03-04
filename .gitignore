@@ -9,3 +9,5 @@
 # Ignore COM files
 *.com
 *.COM
+/.vscode
+*.MAP
