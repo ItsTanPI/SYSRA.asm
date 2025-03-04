@@ -29,10 +29,9 @@
 
     ;SYSRA_Y DW 176
 
-    IDLE DW 0h, 0h, 0h, 810h, 810h, 1818h, 1818h, 0BD0h, 17E8h, 7E0h, 0DB0h, 0DB0h, 366Ch, 37ECh, 7E0h, 810h
-
-    RUN1 DW 0h, 0h, 0h, 810h, 810h, 1818h, 1818h, 0BD0h, 17E8h, 7E0h, 0ED0h, 0ED0h, 3734h, 37E4h, 7D0h, 810h
-    RUN2 DW 0h, 0h, 810h, 810h, 1818h, 1818h, 0BD0h, 17E8h, 7E0h, 0ED0h, 0ED0h, 3734h, 37E4h, 300h, 1B0h, 0h
+    IDLE DW 00h, 00h, 00h, 0810h, 0810h, 01818h, 01818h, 0BD0h, 017E8h, 07E0h, 0ED0h, 0ED0h, 03734h, 037E4h, 07D0h, 0810h
+    RUN1 DW 00h, 00h, 00h, 0810h, 0810h, 01818h, 01818h, 0BD0h, 017E8h, 07E0h, 0ED0h, 036D4h, 03734h, 07E0h, 07C8h, 0C18h
+    RUN2 DW 00h, 00h, 00h, 0810h, 0810h, 01818h, 01818h, 0BD0h, 017E8h, 07E0h, 0ED0h, 0ED0h, 03734h, 037E4h, 0300h, 01B0h
 
     ;Sprite Renderer
     Obj_X DW 0
@@ -46,25 +45,25 @@
     
     TILEINDEX DW 0
 
-    LEFT DW 09800h, 0C000h, 0DC00h, 09C00h, 09D00h, 0C000h, 0DB00h, 09B00h, 09800h, 0DA00h, 0C000h, 09C00h, 09C00h, 0DC00h, 0C000h, 09800h
-    RIGHT DW 019h, 03h, 03Bh, 039h, 039h, 03h, 05Bh, 019h, 0D9h, 0DBh, 03h, 0B9h, 039h, 03Bh, 03h, 019h
+    LEFT DW 0D800h, 0C000h, 0DC00h, 0DC00h, 0DD00h, 0C000h, 0DB00h, 0DB00h, 0D800h, 0DA00h, 0C000h, 0DC00h, 0DC00h, 0DC00h, 0C000h, 0D800h
+    RIGHT DW 01Bh, 03h, 03Bh, 03Bh, 03Bh, 03h, 05Bh, 01Bh, 0DBh, 0DBh, 03h, 0BBh, 03Bh, 03Bh, 03h, 01Bh
     BLC DW 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 08000h, 08000h, 02000h, 00h, 09800h
     BRC DW 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 01h, 0Dh, 0Ch, 00h, 019h
-    TOP DW 0FFFFh, 06666h, 00h, 0BBDDh, 0BBDDh, 0381Ch, 02C0h, 0D0h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
+    TOP DW 0FFFFh, 0FFFFh, 00h, 0BBDDh, 0BBDDh, 0381Ch, 02C0h, 0D0h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
     TLC DW 09800h, 00h, 03000h, 0B000h, 08000h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
     TRC DW 019h, 00h, 04h, 01h, 01h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h
-    BOTTOM DW 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0B00h, 0340h, 0381Ch, 0BBDDh, 0BBDDh, 00h, 06666h, 0FFFFh
-    TOPLEFT DW 0FFFFh, 0A666h, 0C000h, 09BDDh, 09BDDh, 0C01Ch, 0DB40h, 09B00h, 09800h, 0DA00h, 0C000h, 09C00h, 09C00h, 0DC00h, 0C000h, 09800h
-    TOPRIGHT DW 0FFFFh, 06665h, 03h, 0BBD9h, 0BBD9h, 03803h, 05Bh, 019h, 0D9h, 0DBh, 03h, 0B9h, 039h, 03Bh, 03h, 019h
-    BOTTOMLEFT DW 09800h, 0C000h, 0DC00h, 09C00h, 09C00h, 0C000h, 0D800h, 09800h, 098D0h, 0DAC0h, 0C01Ch, 09BDDh, 09BDDh, 0C000h, 0A666h, 0FFFFh
-    BOTTOMRIGHT DW 019h, 03h, 03Bh, 039h, 039h, 03h, 05Bh, 019h, 0D9h, 02DBh, 03803h, 0BBD9h, 0BBD9h, 03h, 06665h, 0FFFFh
-    ALLCOVER DW 0FFFFh, 0A665h, 0C003h, 09A01h, 09801h, 0C003h, 0D003h, 08001h, 08009h, 0C003h, 0C03Bh, 081B9h, 081B9h, 0C003h, 0A665h, 0FFFFh
-    CLOSEM DW 0FFFFh, 06666h, 00h, 0BBDDh, 0BBDDh, 0381Ch, 02C0h, 0D0h, 00h, 00h, 00h, 00h, 00h, 00h, 06666h, 0FFFFh
-    CLOSELEFT DW 0FFFFh, 0A666h, 0C000h, 09BDDh, 09BDDh, 0C01Ch, 0DB40h, 09B00h, 09800h, 0DA00h, 0C000h, 09000h, 08000h, 0C000h, 0A666h, 0FFFFh
-    CLOSERIGHT DW 0FFFFh, 06665h, 03h, 0BBD9h, 0BBD9h, 03803h, 05Bh, 019h, 0D9h, 0DBh, 03h, 029h, 01h, 03h, 06665h, 0FFFFh
-    CLOSEMID DW 08001h, 0C003h, 0C003h, 08001h, 08001h, 0C003h, 0C003h, 08001h, 08001h, 0C003h, 0C003h, 08001h, 08001h, 0C003h, 0C003h, 08001h
-    CLOSETOP DW 0FFFFh, 0A665h, 0C003h, 09BB9h, 09BB9h, 0C03Bh, 0C583h, 081A1h, 08001h, 0C003h, 0C003h, 08001h, 08001h, 0C003h, 0C003h, 08001h
-    CLOSEBOTTOM DW 08001h, 0C003h, 0C003h, 08001h, 08001h, 0C003h, 0C00Bh, 08001h, 08019h, 0D01Bh, 0C383h, 09BB9h, 09BB9h, 0C003h, 0A665h, 0FFFFh
+    BOTTOM DW 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0B00h, 0340h, 0381Ch, 0BBDDh, 0BBDDh, 00h, 0FFFFh, 0FFFFh
+    TOPLEFT DW 0FFFFh, 0FFFFh, 0C000h, 0DBDDh, 0DBDDh, 0C01Ch, 0DB40h, 0DB00h, 0D800h, 0DA00h, 0C000h, 0DC00h, 0DC00h, 0DC00h, 0C000h, 0D800h
+    TOPRIGHT DW 0FFFFh, 0FFFFh, 03h, 0BBDBh, 0BBDBh, 03803h, 05Bh, 01Bh, 0DBh, 0DBh, 03h, 0BBh, 03Bh, 03Bh, 03h, 01Bh
+    BOTTOMLEFT DW 0D800h, 0C000h, 0DC00h, 0DC00h, 0DC00h, 0C000h, 0D800h, 0D800h, 0D8D0h, 0DAC0h, 0C01Ch, 0DBDDh, 0DBDDh, 0C000h, 0FFFFh, 0FFFFh
+    BOTTOMRIGHT DW 01Bh, 03h, 03Bh, 03Bh, 03Bh, 03h, 05Bh, 01Bh, 0DBh, 02DBh, 03803h, 0BBDBh, 0BBDBh, 03h, 0FFFFh, 0FFFFh
+    ALLCOVER DW 0FFFFh, 0FFFFh, 0C003h, 0DA03h, 0D803h, 0C003h, 0D003h, 0C003h, 0C00Bh, 0C003h, 0C03Bh, 0C1BBh, 0C1BBh, 0C003h, 0FFFFh, 0FFFFh
+    CLOSEM DW 0FFFFh, 0FFFFh, 00h, 0BBDDh, 0BBDDh, 0381Ch, 02C0h, 0D0h, 00h, 00h, 00h, 00h, 00h, 00h, 0FFFFh, 0FFFFh
+    CLOSELEFT DW 0FFFFh, 0FFFFh, 0C000h, 0DBDDh, 0DBDDh, 0C01Ch, 0DB40h, 0DB00h, 0D800h, 0DA00h, 0C000h, 0D000h, 0C000h, 0C000h, 0FFFFh, 0FFFFh
+    CLOSERIGHT DW 0FFFFh, 0FFFFh, 03h, 0BBDBh, 0BBDBh, 03803h, 05Bh, 01Bh, 0DBh, 0DBh, 03h, 02Bh, 03h, 03h, 0FFFFh, 0FFFFh
+    CLOSEMID DW 0C003h, 0C003h, 0C003h, 0C003h, 0C003h, 0C003h, 0C003h, 0C003h, 0C003h, 0C003h, 0C003h, 0C003h, 0C003h, 0C003h, 0C003h, 0C003h
+    CLOSETOP DW 0FFFFh, 0FFFFh, 0C003h, 0DBBBh, 0DBBBh, 0C03Bh, 0C583h, 0C1A3h, 0C003h, 0C003h, 0C003h, 0C003h, 0C003h, 0C003h, 0C003h, 0C003h
+    CLOSEBOTTOM DW 0C003h, 0C003h, 0C003h, 0C003h, 0C003h, 0C003h, 0C00Bh, 0C003h, 0C01Bh, 0D01Bh, 0C383h, 0DBBBh, 0DBBBh, 0C003h, 0FFFFh, 0FFFFh
 
 
     LEVEL DW 0FFF0h, 08010h, 08010h, 08210h, 08210h, 08210h, 08010h, 08010h, 08010h, 08F10h
@@ -159,14 +158,12 @@ _Setup PROC
     retf       
 _Setup ENDP
 
-
 _FrameUpdate PROC FAR
     push ds  
     call GAMECYCLE
     pop ds             ; Restore DS
     retf               ; Return far (needed for Turbo C)
 _FrameUpdate ENDP
-
 
 _Input PROC FAR
     push bp          ; Save old base pointer
@@ -198,6 +195,7 @@ GAMECYCLE PROC
     call TILEMAPEDITOR
     call PHYSICSUPDATE
     call ANIMATION
+    call SWAPVGABUFFER
 
     checkTime:
         mov ah, 00h   
@@ -206,16 +204,22 @@ GAMECYCLE PROC
         cmp bx, dx
         jz checkTime
 
+
+    mov LEFTED, 0
+    mov RIGHTED, 0
+    mov JUMPEDED, 0
     RET
 GAMECYCLE ENDP
 
-
 RESET PROC
-    MOV DI, 0         
-    MOV AX, 0         
-    MOV CX, 32000     
+    mov ax, 0B000h  ; Off-screen buffer segment
+    mov es, ax      ; Set ES to point to the buffer
 
-    REP STOSW      
+    xor di, di      ; Start from offset 0 (beginning of buffer)
+    mov cx, 320 * 200  ; Total pixels to clear
+    xor al, al      ; Color to fill (black = 0)
+
+    rep stosb       ; Fill entire buffer with AL (black)
     mov ah, 01h   
     int 16h   
 
@@ -271,9 +275,7 @@ back1:
     jumped_key:
         mov JUMPED, 1
     done:
-        mov LEFTED, 0
-        mov RIGHTED, 0
-        mov JUMPEDED, 0
+        
     RET
 Input ENDP
 
@@ -381,6 +383,7 @@ ANIMATION PROC
     mov ax, FLIP
     mov AUXFLIP, ax
     mov ax, SYSRA_X
+    
     mov bx, 320
     cmp ax, bx
     jle jump
@@ -389,9 +392,10 @@ ANIMATION PROC
     jump:
     ;mov SYSRA_Y, 176
     mov ax, SYSRA_X
+
     mov Obj_X, ax
     mov ax, SYSRA_Y
-
+    add ax, 2
     mov Obj_Y, ax
     mov ax, Frame
     mov dx, 0        ; Clear DX before division
@@ -408,8 +412,6 @@ ANIMATION PROC
     cmp dx, 6
     jle Frame2
 
-    
-
     Frame1:
         lea si, RUN1
         call DRAWSPRITE
@@ -422,11 +424,12 @@ ANIMATION PROC
 
 
     DefaultFrame:
-        lea si, RUN1
+        lea si, IDLE
         call DRAWSPRITE
         jmp QuitFrame
 
     QuitFrame:
+    mov STATE, 0
     mov AUXFLIP, 0
     RET 
 ANIMATION ENDP
@@ -517,6 +520,27 @@ TILEMAPEDITOR PROC
     ;inc SCROLLX
     RET
 TILEMAPEDITOR ENDP
+
+SWAPVGABUFFER PROC
+    push ds
+    mov cx, 320 * 200  ; 64,000 pixels to copy
+    mov si, 0          ; Start of buffer
+    mov di, 0          ; Start of VGA memory
+
+    mov ax, 0A000h     ; VGA memory segment
+    mov es, ax         ; Set ES to VGA
+
+    mov ax, 0B000h     ; Off-screen buffer segment
+    mov ds, ax         ; Set DS to our buffer
+
+    rep movsw          ; Copy entire buffer to VGA
+
+    mov ax, 0B000h     ; Off-screen buffer segment
+    mov es, ax         ; Set DS to our buffer
+
+    pop ds
+    ret
+SWAPVGABUFFER ENDP
 
 FLIPSPRITE PROC
     push cx
@@ -629,6 +653,8 @@ COPYPIXEL PROC
     ADD ax, cx         
     MOV DI, AX  
 
+    mov ax, 0B000h
+    mov es, ax
     mov ax, 0
     mov AL, BYTE PTR ES:[DI]
 
