@@ -1,9 +1,9 @@
-.MODEL SMALL      ; Memory model: SMALL (for Turbo C)
-.STACK 100h       ; Allocate stack space
+.MODEL SMALL  
+.STACK 100h
 
 .DATA
-    msg db 0, "$"   ; Null-terminated string
     ;Game
+    FrameBuffer DW 0
     LastTimeD DW 0
     Frame DW 0
 
@@ -19,7 +19,7 @@
     SYSRA_VEL_X DW 0
     SYSRA_VEL_Y DW 0
 
-    GRAVITY DW 4
+    GRAVITY DW 3
 
     JUMPED DW 0
 
@@ -143,18 +143,18 @@
 
 .CODE
 
-
-PUBLIC _FrameUpdate   ; Make function available to C
+PUBLIC _FrameUpdate   
 PUBLIC _Setup 
 PUBLIC _Input
-;description
+
 _Setup PROC
     push ds  
     MOV AX, 13h       
     INT 10h           
-    MOV AX, 0A000h    ; Load VGA memory segment
-    MOV ES, AX        ; Set ES to point to VGA memory 
-    pop ds             ; Restore DS
+    MOV AX, 0A000h    
+    MOV ES, AX 
+    call ALLOCATE_FRAME_BUFFER        
+    pop ds             
     retf       
 _Setup ENDP
 
@@ -182,13 +182,20 @@ _Input PROC FAR
     retf             ; Return FAR (for Turbo C)
 _Input ENDP
 
+ALLOCATE_FRAME_BUFFER PROC
+    MOV AH, 48h        
+    MOV BX, 4000h      
+    INT 21h            
+    MOV FrameBuffer, AX 
+    RET
+
+ALLOCATE_FRAME_BUFFER ENDP
+
 GAMECYCLE PROC
     
     GameLoop:
-        inc Frame
-        mov ah, 00h   
-        int 1Ah       
-        mov LastTimeD, dx
+    
+    inc Frame
     
     call RESET
     call INPUT
@@ -197,14 +204,6 @@ GAMECYCLE PROC
     call ANIMATION
     call SWAPVGABUFFER
 
-    checkTime:
-        mov ah, 00h   
-        int 1Ah       
-        mov bx, LastTimeD
-        cmp bx, dx
-        jz checkTime
-
-
     mov LEFTED, 0
     mov RIGHTED, 0
     mov JUMPEDED, 0
@@ -212,16 +211,15 @@ GAMECYCLE PROC
 GAMECYCLE ENDP
 
 RESET PROC
-    mov ax, 0B000h  ; Off-screen buffer segment
-    mov es, ax      ; Set ES to point to the buffer
+    mov ax, FrameBuffer  
+    mov es, ax      
 
-    xor di, di      ; Start from offset 0 (beginning of buffer)
-    mov cx, 320 * 200  ; Total pixels to clear
-    xor al, al      ; Color to fill (black = 0)
+    xor di, di      
+    mov cx, 320 * 200  
+    xor al, al      
 
-    rep stosb       ; Fill entire buffer with AL (black)
-    mov ah, 01h   
-    int 16h   
+    mov ah, 01h     
+    rep stosb       
 
     RET 
 RESET ENDP
@@ -247,8 +245,7 @@ back1:
 
     left_arrow:
         
-
-        sub SYSRA_X, 3
+        sub SYSRA_X, 1
         mov FLIP, 1   
         mov STATE, 1
         jmp back
@@ -261,10 +258,10 @@ back1:
 
 
         MOVSYSRA:
-            add SYSRA_X, 3
+            add SYSRA_X, 1
             jmp FLIPState
         MOVSCROLL:
-            add SCROLLX, 3
+            add SCROLLX, 1
             mov SYSRA_X, 160
             
         FLIPState:   
@@ -283,11 +280,11 @@ JUMPINPUT PROC
     
     mov ax, JUMPED
     cmp ax, 1
-    jz jump_key 
+    jz jump_key
     jmp doneJump
 
     jump_key:
-        sub SYSRA_Y, 30
+        sub SYSRA_Y, 6
         
     doneJump:
     mov JUMPED, 0
@@ -307,10 +304,6 @@ PHYSICSUPDATE PROC
 
     RET    
 PHYSICSUPDATE ENDP
-
-DRAW PROC
-    RET
-DRAW ENDP
 
 DRAWSPRITE PROC
     ;lea si, RUN1
@@ -395,21 +388,21 @@ ANIMATION PROC
 
     mov Obj_X, ax
     mov ax, SYSRA_Y
-    add ax, 2
+    ;add ax, 1
     mov Obj_Y, ax
     mov ax, Frame
-    mov dx, 0        ; Clear DX before division
-    mov bx, 6
-    div bx           ; AX = Frame / 3, DX = Frame % 3
+    mov dx, 0        
+    mov bx, 20
+    div bx           
 
     mov cx, STATE
     cmp cx, 0
     jz DefaultFrame
 
-    cmp dx, 3
+    cmp dx, 10
     jl Frame1
 
-    cmp dx, 6
+    cmp dx, 20
     jle Frame2
 
     Frame1:
@@ -530,12 +523,12 @@ SWAPVGABUFFER PROC
     mov ax, 0A000h     ; VGA memory segment
     mov es, ax         ; Set ES to VGA
 
-    mov ax, 0B000h     ; Off-screen buffer segment
+    mov ax, FrameBuffer     ; Off-screen buffer segment
     mov ds, ax         ; Set DS to our buffer
 
     rep movsw          ; Copy entire buffer to VGA
 
-    mov ax, 0B000h     ; Off-screen buffer segment
+    mov ax, FrameBuffer     ; Off-screen buffer segment
     mov es, ax         ; Set DS to our buffer
 
     pop ds
@@ -601,6 +594,7 @@ COLLISIONDEDECTION PROC
         loop COLLUPDW
         add bl ,bh
         mov bh, 0
+        sub bx, 1
         sub SYSRA_Y, bx
 
     mov cx, SYSRA_X
@@ -653,7 +647,7 @@ COPYPIXEL PROC
     ADD ax, cx         
     MOV DI, AX  
 
-    mov ax, 0B000h
+    mov ax, FrameBuffer
     mov es, ax
     mov ax, 0
     mov AL, BYTE PTR ES:[DI]
