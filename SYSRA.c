@@ -1,5 +1,3 @@
-//Thank you for Leonardo Ono
-// GIT LINK : https://github.com/leonardo-ono/Assembly8086KeyboardInputHandlerINT9h  
 #include <dos.h>
 extern void far install_key_handler();
 extern void far uninstall_key_handler();
