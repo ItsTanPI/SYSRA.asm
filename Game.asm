@@ -215,6 +215,7 @@ GAMECYCLE PROC
     call INPUT
     call TILEMAPEDITOR
     call PHYSICSUPDATE
+    call CLAMPPOS
     call ANIMATION
     call SWAPVGABUFFER
 
@@ -291,6 +292,42 @@ INPUT PROC
         
     RET
 Input ENDP
+
+CLAMPPOS PROC
+    Xpox:
+    mov ax, SYSRA_X
+    cmp ax, 320
+    jge GTX320
+    cmp ax, 0
+    jle LEX320
+    jmp Ypox
+
+    GTX320:
+        mov SYSRA_X, 312
+        jmp Ypox
+    LEX320:
+        mov SYSRA_X, 8
+        jmp Ypox
+    
+    Ypox:
+    mov ax, SYSRA_Y
+    cmp ax, 200
+    jge GTY200
+    cmp ax, 0
+    jle LEX200
+    jmp posout
+
+    GTY200:
+        mov SYSRA_Y, 150
+        jmp posout
+    LEX200:
+        mov SYSRA_Y, 50
+        jmp posout
+
+    posout:
+        ret
+
+CLAMPPOS ENDP
 
 JUMPINPUT PROC
     
