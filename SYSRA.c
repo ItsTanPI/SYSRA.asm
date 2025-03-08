@@ -8,6 +8,8 @@ extern int far is_key_pressed(int code);
 void far Setup();
 void far FrameUpdate();
 void far Input(int a, int b, int c);
+void far Exit();
+
 
 int main()
 {
@@ -17,7 +19,9 @@ int main()
 	{
 		Input(is_key_pressed('K'), is_key_pressed('M'), (is_key_pressed(',') || is_key_pressed('H')));
 		FrameUpdate();
-		delay(15);
+		delay(20);
 	}
+	Exit();
 	uninstall_key_handler();
+
 }

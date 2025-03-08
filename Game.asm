@@ -11,6 +11,8 @@
     SYSRA_X DW 50
     SYSRA_Y DW 50
 
+    isGROUNDED db 0
+
     STATE DW 0
 
     FLIP DW 0
@@ -19,7 +21,10 @@
     SYSRA_VEL_X DW 0
     SYSRA_VEL_Y DW 0
 
-    GRAVITY DW 3
+    FORCEX DW 0
+    FORCEY DW 0
+
+    GRAVITY DW 1
 
     JUMPED DW 0
 
@@ -146,6 +151,7 @@
 PUBLIC _FrameUpdate   
 PUBLIC _Setup 
 PUBLIC _Input
+PUBLIC _Exit
 
 _Setup PROC
     push ds  
@@ -181,6 +187,14 @@ _Input PROC FAR
     pop bp           ; Restore base pointer
     retf             ; Return FAR (for Turbo C)
 _Input ENDP
+
+
+_Exit PROC
+    MOV AH, 00
+    MOV AL, 03h    
+    INT 10h        
+    retf
+_Exit ENDP
 
 ALLOCATE_FRAME_BUFFER PROC
     MOV AH, 48h        
@@ -218,8 +232,8 @@ RESET PROC
     mov cx, 320 * 200  
     xor al, al      
 
-    mov ah, 01h     
-    rep stosb       
+    mov ah, 02h     
+    rep stosb   
 
     RET 
 RESET ENDP
@@ -229,23 +243,25 @@ INPUT PROC
     cmp al, 1    
     je left_arrow  
 
-back:
-    mov ax, RIGHTED
-    cmp al, 1     
-    je right_arrow
+    back:
+        mov ax, RIGHTED
+        cmp al, 1     
+        je right_arrow
 
-back1:
-    mov ax, JUMPEDED
-    cmp al, 1      
-    je jumped_key
+    back1:
+        mov ax, JUMPEDED
+        cmp al, 1      
+        je jumped_key
 
-    
-    
     jmp done
 
     left_arrow:
         
-        sub SYSRA_X, 1
+        add SYSRA_VEL_X, 1
+
+
+
+        sub SYSRA_X, 2
         mov FLIP, 1   
         mov STATE, 1
         jmp back
@@ -258,10 +274,10 @@ back1:
 
 
         MOVSYSRA:
-            add SYSRA_X, 1
+            add SYSRA_X, 2
             jmp FLIPState
         MOVSCROLL:
-            add SCROLLX, 1
+            add SCROLLX, 2
             mov SYSRA_X, 160
             
         FLIPState:   
@@ -278,29 +294,77 @@ Input ENDP
 
 JUMPINPUT PROC
     
+
+    cmp isGROUNDED, 0
+    je doneJump
+
     mov ax, JUMPED
     cmp ax, 1
+
     jz jump_key
     jmp doneJump
 
     jump_key:
-        sub SYSRA_Y, 6
-        
+        mov FORCEY, 3
+        mov ax, 3
+        sub SYSRA_VEL_Y, ax
+
+        mov FORCEY, 3    
     doneJump:
+    
+    mov ax, FORCEY
+    sub SYSRA_VEL_Y, ax
+    
+    mov bx, 2
+
+
+    cmp FORCEY, 0
+    jle damp
+    sub FORCEY, 1
+    jmp doneJump2
+
+
+    damp:
+    mov FORCEY, 0
+
+    doneJump2:
     mov JUMPED, 0
     RET
 JUMPINPUT ENDP
 
 PHYSICSUPDATE PROC
     
-
-    mov ax, GRAVITY
-    add SYSRA_Y, ax
     
+    call GROUNDCHEK
 
     call JUMPINPUT
+
+    cmp isGROUNDED, 1
+    jz skipG
     
+
+    mov ax, GRAVITY
+    add SYSRA_VEL_Y, ax
+
+    cmp SYSRA_VEL_Y, 10
+    jl clampVelo
+    mov SYSRA_VEL_Y, 10
+    clampVelo:
+
+    skipG:
     call COLLISIONDEDECTION
+
+    mov ax, SYSRA_VEL_Y
+    add SYSRA_Y, ax
+    
+    call GROUNDCHEK
+    cmp isGROUNDED, 1
+    je setYZero
+    jmp outofG
+    setYZero:
+        mov SYSRA_VEL_Y, 0
+
+    outofG:
 
     RET    
 PHYSICSUPDATE ENDP
@@ -516,7 +580,7 @@ TILEMAPEDITOR ENDP
 
 SWAPVGABUFFER PROC
     push ds
-    mov cx, 320 * 200  ; 64,000 pixels to copy
+    mov cx, 320 * 100  ; 64,000 pixels to copy
     mov si, 0          ; Start of buffer
     mov di, 0          ; Start of VGA memory
 
@@ -526,7 +590,7 @@ SWAPVGABUFFER PROC
     mov ax, FrameBuffer     ; Off-screen buffer segment
     mov ds, ax         ; Set DS to our buffer
 
-    rep movsw          ; Copy entire buffer to VGA
+    rep movsw       
 
     mov ax, FrameBuffer     ; Off-screen buffer segment
     mov es, ax         ; Set DS to our buffer
@@ -560,7 +624,6 @@ FLIPSPRITE PROC
 FLIPSPRITE ENDP
 
 COLLISIONDEDECTION PROC
-
     mov cx, SYSRA_X
     mov dx, SYSRA_Y
     sub dx, 14
@@ -590,13 +653,25 @@ COLLISIONDEDECTION PROC
             TOBH:
                 add bh, 1
         NOBX:
+
+
         inc Obj_Y
         loop COLLUPDW
-        add bl ,bh
+        mov ax, bx
+        mov al, ah
+        mov ah, 0
         mov bh, 0
-        sub bx, 1
-        sub SYSRA_Y, bx
+        add ax, ax
+        add SYSRA_Y, bx
+        sub SYSRA_Y, ax
 
+        cmp bx, 0
+        jnz updateYvelocity
+        jmp xcoll
+
+        updateYvelocity: mov SYSRA_VEL_Y, 0
+
+        xcoll:
     mov cx, SYSRA_X
     mov dx, SYSRA_Y
     sub dx, 8
@@ -640,6 +715,37 @@ COLLISIONDEDECTION PROC
 
     RET
 COLLISIONDEDECTION ENDP
+
+GROUNDCHEK PROC
+    mov isGROUNDED, 0
+    mov cx, SYSRA_X
+    mov dx, SYSRA_Y
+    add dx, 1
+
+    mov Obj_X, cx
+    mov Obj_Y, dx
+   
+    mov bx, 0
+    mov cx, 2
+    GNDDW:
+        push cx
+        mov cx, Obj_X
+        mov dx, Obj_Y
+        call COPYPIXEL
+        pop cx
+        cmp al, 0Fh
+        je GND
+        jmp NOTGND
+
+        GND:
+            mov isGROUNDED, 1
+        NOTGND:
+        inc Obj_Y
+        loop GNDDW
+    
+    
+    ret
+GROUNDCHEK ENDP
 
 COPYPIXEL PROC
     MOV AX, 320        
