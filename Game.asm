@@ -5,18 +5,11 @@
     ;Game
     FrameBuffer DW 0
     LastTimeD DW 0
+    
     Frame DW 0
 
-    ;Player
     SYSRA_X DW 50
     SYSRA_Y DW 50
-
-    isGROUNDED db 0
-
-    STATE DW 0
-
-    FLIP DW 0
-    AUXFLIP DW 0
 
     SYSRA_VEL_X DW 0
     SYSRA_VEL_Y DW 0
@@ -24,8 +17,16 @@
     FORCEX DW 0
     FORCEY DW 0
 
-    GRAVITY DW 1
+    isGROUNDED dW 0
 
+    SCROLLX DW 0
+
+
+    ;Player
+    STATE DW 0
+    FLIP DW 0
+    AUXFLIP DW 0
+    GRAVITY DW 1
     JUMPED DW 0
 
 
@@ -37,6 +38,8 @@
     IDLE DW 00h, 00h, 00h, 0810h, 0810h, 01818h, 01818h, 0BD0h, 017E8h, 07E0h, 0ED0h, 0ED0h, 03734h, 037E4h, 07D0h, 0810h
     RUN1 DW 00h, 00h, 00h, 0810h, 0810h, 01818h, 01818h, 0BD0h, 017E8h, 07E0h, 0ED0h, 036D4h, 03734h, 07E0h, 07C8h, 0C18h
     RUN2 DW 00h, 00h, 00h, 0810h, 0810h, 01818h, 01818h, 0BD0h, 017E8h, 07E0h, 0ED0h, 0ED0h, 03734h, 037E4h, 0300h, 01B0h
+    RAISE DW 00h, 0810h, 0810h, 01818h, 01818h, 0BD0h, 017E8h, 0FF0h, 0ED0h, 0ED0h, 06F36h, 0FE0h, 0FD8h, 01808h, 00h, 00h
+    FALL DW 00h, 00h, 0810h, 0810h, 01818h, 01818h, 0BD0h, 017E8h, 04DB2h, 04DB2h, 02E74h, 0FF0h, 0FF0h, 07E0h, 0810h, 0810h
 
     ;Sprite Renderer
     Obj_X DW 0
@@ -134,7 +137,6 @@
                     DW 702
 
     TILEMAPX DW 0
-    SCROLLX DW 0
     
     TILEPOINTERX DW 0
     TILEPOINTERY DW 0
@@ -216,11 +218,18 @@ GAMECYCLE PROC
     call PHYSICSUPDATE
     call CLAMPPOS
     call ANIMATION
+
+    lea si, Frame
+    mov Obj_X, 40
+    mov Obj_Y, 40
+    call DRAWSPRITE
+    
     call SWAPVGABUFFER
+
 
     mov LEFTED, 0
     mov RIGHTED, 0
-    mov JUMPEDED, 0
+    ;mov JUMPEDED, 0
     RET
 GAMECYCLE ENDP
 
@@ -258,9 +267,6 @@ INPUT PROC
     left_arrow:
         
         add SYSRA_VEL_X, 1
-
-
-
         sub SYSRA_X, 2
         mov FLIP, 1   
         mov STATE, 1
@@ -329,7 +335,6 @@ CLAMPPOS PROC
 CLAMPPOS ENDP
 
 JUMPINPUT PROC
-    
 
     cmp isGROUNDED, 0
     je doneJump
@@ -338,8 +343,6 @@ JUMPINPUT PROC
     cmp ax, 1
     jz jump_key
     jmp doneJump
-
-
 
     jump_key:
         mov FORCEY, 2
@@ -351,20 +354,17 @@ JUMPINPUT PROC
     mov ax, FORCEY
     sub SYSRA_VEL_Y, ax
     
-    mov bx, 2
-
-
     cmp FORCEY, 0
     jle damp
     sub FORCEY, 1
     jmp doneJump2
-
 
     damp:
     mov FORCEY, 0
 
     doneJump2:
     mov JUMPED, 0
+    mov JUMPEDED, 0
     RET
 JUMPINPUT ENDP
 
@@ -378,7 +378,9 @@ PHYSICSUPDATE PROC
     idiv bx
     cmp dx, 0
     jne skipG
+    
     call JUMPINPUT
+    
 
     cmp isGROUNDED, 1
     jz skipG
@@ -479,6 +481,28 @@ DRAWSPRITE PROC
 DRAWSPRITE ENDP
 
 ANIMATION PROC
+
+    cmp isGROUNDED, 0
+    je AIR
+    jmp Anima
+    
+    AIR:
+        cmp SYSRA_VEL_Y, 0
+        jl RAINSING
+        cmp SYSRA_VEL_Y, 0
+        jge FALLING
+        
+        jmp Anima
+
+        RAINSING:
+            mov STATE, 2
+            jmp Anima
+        FALLING:
+            mov STATE, 3
+            jmp Anima
+
+    Anima:
+
     mov ax, FLIP
     mov AUXFLIP, ax
     mov ax, SYSRA_X
@@ -505,6 +529,12 @@ ANIMATION PROC
     cmp cx, 0
     jz DefaultFrame
 
+    cmp cx, 2
+    jz RAINSINGFrame
+
+    cmp cx, 3
+    jz FALLINGFrame
+
     cmp dx, 8
     jl Frame1
 
@@ -521,6 +551,15 @@ ANIMATION PROC
         call DRAWSPRITE
         jmp QuitFrame
 
+    RAINSINGFrame:
+        lea si, RAISE
+        call DRAWSPRITE
+        jmp QuitFrame
+
+    FALLINGFrame:
+        lea si, FALL
+        call DRAWSPRITE
+        jmp QuitFrame
 
     DefaultFrame:
         lea si, IDLE
@@ -762,13 +801,13 @@ GROUNDCHEK PROC
     mov isGROUNDED, 0
     mov cx, SYSRA_X
     mov dx, SYSRA_Y
-    sub dx, 1
+    add dx, 1
 
     mov Obj_X, cx
     mov Obj_Y, dx
    
     mov bx, 0
-    mov cx, 3
+    mov cx, 2
     GNDDW:
         push cx
         mov cx, Obj_X

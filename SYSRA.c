@@ -11,14 +11,14 @@ void far Exit();
 
 int main()
 {
-	Setup();
 	install_key_handler();
+	Setup();
 	while (!is_key_pressed(1))
 	{
 		Input(is_key_pressed('K'), is_key_pressed('M'), (is_key_pressed(',') || is_key_pressed('H')));
 		FrameUpdate();
 		delay(20);
 	}
-	uninstall_key_handler();
 	Exit();
+	uninstall_key_handler();
 }
