@@ -167,25 +167,24 @@ _Setup ENDP
 _FrameUpdate PROC FAR
     push ds  
     call GAMECYCLE
-    pop ds             ; Restore DS
-    retf               ; Return far (needed for Turbo C)
+    pop ds             
+    retf               
 _FrameUpdate ENDP
 
 _Input PROC FAR
-    push bp          ; Save old base pointer
-    mov bp, sp       ; Set new base pointer
+    push bp          
+    mov bp, sp       
 
-    mov ax, [bp+6]   ; First parameter (a)
-    mov bx, [bp+8]   ; Second parameter (b)
-    mov cx, [bp+10]   ; Third parameter (c)
+    mov ax, [bp+6]   
+    mov bx, [bp+8]   
+    mov cx, [bp+10]   
 
     mov LEFTED, ax
     mov RIGHTED, bx
     mov JUMPEDED, cx
-    ; Do something with a, b, c (AX, BX, CX)
     
-    pop bp           ; Restore base pointer
-    retf             ; Return FAR (for Turbo C)
+    pop bp          
+    retf
 _Input ENDP
 
 
@@ -337,17 +336,17 @@ JUMPINPUT PROC
 
     mov ax, JUMPED
     cmp ax, 1
-
     jz jump_key
     jmp doneJump
 
+
+
     jump_key:
-        mov FORCEY, 3
+        mov FORCEY, 2
         mov ax, 3
         sub SYSRA_VEL_Y, ax
-
-        mov FORCEY, 3    
-    doneJump:
+   
+    doneJump:    
     
     mov ax, FORCEY
     sub SYSRA_VEL_Y, ax
@@ -374,6 +373,11 @@ PHYSICSUPDATE PROC
     
     call GROUNDCHEK
 
+    mov ax, Frame
+    mov bx, 3
+    idiv bx
+    cmp dx, 0
+    jne skipG
     call JUMPINPUT
 
     cmp isGROUNDED, 1
@@ -383,9 +387,10 @@ PHYSICSUPDATE PROC
     mov ax, GRAVITY
     add SYSRA_VEL_Y, ax
 
-    cmp SYSRA_VEL_Y, 10
+
+    cmp SYSRA_VEL_Y, 5
     jl clampVelo
-    mov SYSRA_VEL_Y, 10
+    mov SYSRA_VEL_Y, 5
     clampVelo:
 
     skipG:
@@ -493,17 +498,17 @@ ANIMATION PROC
     mov Obj_Y, ax
     mov ax, Frame
     mov dx, 0        
-    mov bx, 20
+    mov bx, 15
     div bx           
 
     mov cx, STATE
     cmp cx, 0
     jz DefaultFrame
 
-    cmp dx, 10
+    cmp dx, 8
     jl Frame1
 
-    cmp dx, 20
+    cmp dx, 15
     jle Frame2
 
     Frame1:
@@ -757,13 +762,13 @@ GROUNDCHEK PROC
     mov isGROUNDED, 0
     mov cx, SYSRA_X
     mov dx, SYSRA_Y
-    add dx, 1
+    sub dx, 1
 
     mov Obj_X, cx
     mov Obj_Y, dx
    
     mov bx, 0
-    mov cx, 2
+    mov cx, 3
     GNDDW:
         push cx
         mov cx, Obj_X
