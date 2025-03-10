@@ -189,7 +189,6 @@ _Input PROC FAR
     retf
 _Input ENDP
 
-
 _Exit PROC
     MOV AH, 00
     MOV AL, 03h    
@@ -229,7 +228,7 @@ GAMECYCLE PROC
 
     mov LEFTED, 0
     mov RIGHTED, 0
-    ;mov JUMPEDED, 0
+    mov JUMPEDED, 0
     RET
 GAMECYCLE ENDP
 
@@ -725,7 +724,7 @@ COLLISIONDEDECTION PROC
         jmp NOBX
 
         ADDBX:
-            cmp cx, 8
+            cmp cx, 10
             jle TOBL 
             jmp TOBH
 
@@ -743,8 +742,14 @@ COLLISIONDEDECTION PROC
         mov ah, 0
         mov bh, 0
         add ax, ax
-        add SYSRA_Y, bx
-        sub SYSRA_Y, ax
+        add bx, bx
+        add bx, bx
+        add SYSRA_Y, ax
+        sub SYSRA_Y, bx
+
+        cmp ax, 0
+        jnz updateYvelocity
+        jmp xcoll
 
         cmp bx, 0
         jnz updateYvelocity
@@ -752,7 +757,7 @@ COLLISIONDEDECTION PROC
 
         updateYvelocity: mov SYSRA_VEL_Y, 0
 
-        xcoll:
+    xcoll:
     mov cx, SYSRA_X
     mov dx, SYSRA_Y
     sub dx, 8
@@ -774,7 +779,7 @@ COLLISIONDEDECTION PROC
         jmp NOBXS
 
         ADDBXS:
-            cmp cx, 10
+            cmp cx, 8
             jg TOBLS 
             jmp TOBHS
 
@@ -823,7 +828,6 @@ GROUNDCHEK PROC
         NOTGND:
         inc Obj_Y
         loop GNDDW
-    
     
     ret
 GROUNDCHEK ENDP
