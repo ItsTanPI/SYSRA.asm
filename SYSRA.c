@@ -3,10 +3,10 @@ extern void far install_key_handler();
 extern void far uninstall_key_handler();
 extern int far is_key_pressed(int code);
 
-void far Setup();
-void far FrameUpdate();
-void far Input(int a, int b, int c);
-void far Exit();
+extern void far Setup();
+extern void far FrameUpdate();
+extern void far Input(int a, int b, int c);
+extern void far Exit();
 
 
 int main()

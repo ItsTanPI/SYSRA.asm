@@ -1,4 +1,3 @@
-
 ; This code does not belong to me (TANPI)
 ; Thank you for Leonardo Ono
 ; GIT LINK : https://github.com/leonardo-ono/Assembly8086KeyboardInputHandlerINT9h 
