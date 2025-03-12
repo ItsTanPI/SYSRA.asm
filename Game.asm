@@ -19,7 +19,7 @@
 
     isGROUNDED dW 0
 
-    CAYOTYTIME dw 0 
+    COYOTETIME dw 0 
 
     SCROLLX DW 0
 
@@ -322,7 +322,7 @@ CLAMPPOS ENDP
 
 JUMPINPUT PROC
 
-    cmp CAYOTYTIME, 0
+    cmp COYOTETIME, 0
     jle doneJump
 
     mov ax, JUMPED
@@ -332,7 +332,7 @@ JUMPINPUT PROC
 
     jump_key:
         mov SYSRA_VEL_Y, 0
-        mov CAYOTYTIME, 0
+        mov COYOTETIME, 0
         mov FORCEY, 2
         mov ax, 3
         sub SYSRA_VEL_Y, ax
@@ -356,29 +356,29 @@ JUMPINPUT PROC
     RET
 JUMPINPUT ENDP
 
-CAYOTY PROC
+COYOTE PROC
     cmp isGROUNDED, 1
     je setCy
     jmp deccy
 
         setCy:
-        mov CAYOTYTIME, 10
+        mov COYOTETIME, 10
         jmp exitCY
 
     deccy:
     cmp isGROUNDED, 0
     jne exitCY
-    dec CAYOTYTIME
-    cmp CAYOTYTIME, 0
+    dec COYOTETIME
+    cmp COYOTETIME, 0
     jnle exitCY
-    mov CAYOTYTIME, 0
+    mov COYOTETIME, 0
     exitCY:
     RET
-CAYOTY ENDP
+COYOTE ENDP
 
 PHYSICSUPDATE PROC
     call GROUNDCHEK
-    call CAYOTY
+    call COYOTE
 
     mov ax, Frame
     mov bx, 3
