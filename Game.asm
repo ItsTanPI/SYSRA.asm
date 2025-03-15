@@ -1,5 +1,20 @@
 .MODEL SMALL  
-.STACK 100h
+.STACK 64h
+
+Entity STRUC
+    X DW ?         
+    Y DW ?       
+    Image DW ?
+    Movement DB ?
+    ;76543210
+    ;||||||||+-- Bit 0: Can Move (1 = can move, 0 = cannot move)
+    ;|||||||+--- Bit 1: Direction (1 = Up, 0 = Down)
+    ;||||||+---- Bit 2: Side (1 = +, 0 = -)
+    ;|||||+----- Bit 3: Collision (1 = no collision, 0 = collision)
+    ;||||+------ Bit 4: speed
+
+Entity ENDS
+
 
 .DATA
     ;Game
@@ -8,6 +23,7 @@
     
     Frame DW 0
 
+    PLAYERDEAD db 0
     SYSRA_X DW 50
     SYSRA_Y DW 50
 
@@ -16,6 +32,7 @@
 
     FORCEX DW 0
     FORCEY DW 0
+
 
     isGROUNDED dW 0
 
@@ -42,6 +59,8 @@
     RUN2 DW 00h, 00h, 00h, 0810h, 0810h, 01818h, 01818h, 0BD0h, 017E8h, 07E0h, 0ED0h, 0ED0h, 03734h, 037E4h, 0300h, 01B0h
     RAISE DW 00h, 0810h, 0810h, 01818h, 01818h, 0BD0h, 017E8h, 0FF0h, 0ED0h, 0ED0h, 06F36h, 0FE0h, 0FD8h, 01808h, 00h, 00h
     FALL DW 00h, 00h, 0810h, 0810h, 01818h, 01818h, 0BD0h, 017E8h, 04DB2h, 04DB2h, 02E74h, 0FF0h, 0FF0h, 07E0h, 0810h, 0810h
+    DEAD DW 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0408h, 0408h, 0C0Ch, 0C0Ch, 05E8h, 0BF4h, 07F8h, 016E8h, 03718h
+
 
     ;Sprite Renderer
     Obj_X DW 0
@@ -51,10 +70,11 @@
 
     SPRITEPOINTERX DW 0
     SPRITEPOINTERY DW 0
-    AUXSPRITE DW 0            
+    AUXSPRITE DW 0          
     
     TILEINDEX DW 0
 
+    NULL DW 0000h, 0000h, 0000h, 0000h, 0000h, 0000h, 0000h, 0000h, 0000h, 0000h, 0000h, 0000h, 0000h, 0000h, 0000h, 0000h
     LEFT DW 0D800h, 0C000h, 0DC00h, 0DC00h, 0DD00h, 0C000h, 0DB00h, 0DB00h, 0D800h, 0DA00h, 0C000h, 0DC00h, 0DC00h, 0DC00h, 0C000h, 0D800h
     RIGHT DW 01Bh, 03h, 03Bh, 03Bh, 03Bh, 03h, 05Bh, 01Bh, 0DBh, 0DBh, 03h, 0BBh, 03Bh, 03Bh, 03h, 01Bh
     BLC DW 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 00h, 08000h, 08000h, 02000h, 00h, 09800h
@@ -76,6 +96,9 @@
     CLOSEBOTTOM DW 0C003h, 0C003h, 0C003h, 0C003h, 0C003h, 0C003h, 0C00Bh, 0C003h, 0C01Bh, 0D01Bh, 0C383h, 0DBBBh, 0DBBBh, 0C003h, 0FFFFh, 0FFFFh
 
 
+    SPIKE DW 00h, 00h, 00h, 00h, 00h, 00h, 00h, 01818h, 01818h, 02C2Ch, 02C2Ch, 02C2Ch, 04E4Eh, 04E4Eh, 0FFFFh, 08001h
+
+    
     LEVEL DW 0FFE0h, 00020h, 00020h, 00020h, 00020h, 00020h, 00020h, 00030h, 00000h, 00000h
         DW 00030h, 00020h, 00020h, 00020h, 00020h, 00020h, 00020h, 00020h, 00030h, 00000h
         DW 00100h, 00100h, 00100h, 00000h, 00000h, 00100h, 00000h, 00000h, 00100h, 00100h
@@ -101,6 +124,7 @@
         DW OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP
         DW OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET LEFT, OFFSET LEFT, OFFSET LEFT, OFFSET LEFT, OFFSET LEFT, OFFSET LEFT
         DW OFFSET LEFT, OFFSET LEFT, OFFSET LEFT, OFFSET LEFT, OFFSET TLC
+    
     TILEOFFSETINDEX DW 0, 22, 24, 26, 28, 30, 32, 34, 38, 38
                     DW 38, 42, 44, 46, 48, 50, 52, 54, 56, 60
                     DW 60, 62, 64, 66, 66, 66, 68, 68, 68, 70
@@ -124,6 +148,10 @@
     RIGHTED DW 0
     JUMPEDED DW 0
 
+    Entities Entity <56, 160, OFFSET SPIKE, >, <1500, 160, OFFSET SPIKE>
+    NoOfEnt DW 2
+    EntityOffset dw 0
+    
 
 .CODE
 
@@ -193,13 +221,14 @@ GAMECYCLE PROC
     call TILEMAPEDITOR
     call PHYSICSUPDATE
     call CLAMPPOS
+    call DRAWENTITY
     call ANIMATION
 
     ;lea si, Frame
     ;mov Obj_X, 40
     ;mov Obj_Y, 40
     ;call DRAWSPRITE
-    
+    call PLAYERKILL
     call SWAPVGABUFFER
 
 
@@ -275,26 +304,6 @@ INPUT PROC
 Input ENDP
 
 CLAMPPOS PROC
-    Xpox:
-    mov ax, SYSRA_X
-    cmp ax, 320
-    jge GTX320
-    cmp ax, 0
-    jle LEX320
-    jmp Ypox
-
-    GTX320:
-        mov SYSRA_Y, 50
-        mov SYSRA_x, 50
-        mov SCROLLX, 0
-        jmp Ypox
-    LEX320:
-        mov SYSRA_Y, 50
-        mov SYSRA_x, 50
-        mov SCROLLX, 0
-        
-        jmp Ypox
-    
     Ypox:
     mov ax, SYSRA_Y
     cmp ax, 200
@@ -304,21 +313,34 @@ CLAMPPOS PROC
     jmp posout
 
     GTY200:
-        mov SYSRA_Y, 50
-        mov SYSRA_x, 50
-        mov SCROLLX, 0
+        mov PLAYERDEAD, 1
         jmp posout
     LEX200:
-        mov SYSRA_Y, 50
-        mov SYSRA_x, 50
-        mov SCROLLX, 0
-
+        mov PLAYERDEAD, 1
         jmp posout
-
     posout:
         ret
 
 CLAMPPOS ENDP
+
+PLAYERKILL PROC
+
+    cmp PLAYERDEAD, 1
+    jne dontKill
+
+    mov SYSRA_Y, 50
+    mov SYSRA_x, 50
+    mov SCROLLX, 0
+
+    mov SYSRA_VEL_y, 0
+    mov FORCEX, 0
+    mov FORCEY, 0
+
+
+    dontKill:
+    mov PLAYERDEAD, 0
+    ret
+PLAYERKILL ENDP
 
 JUMPINPUT PROC
 
@@ -490,13 +512,20 @@ RENDER PROC
     ADD AX, CX         
     MOV DI, AX         
 
-    MOV AL, 0Fh        
+    MOV AL, 0fh        
     MOV BYTE PTR ES:[DI], AL
     RET
 RENDER ENDP
 
 ANIMATION PROC
 
+    cmp PLAYERDEAD, 1
+    jnge nextani
+
+    mov STATE, 4
+    jmp Anima
+
+    nextani:
     cmp isGROUNDED, 0
     je AIR
     jmp Anima
@@ -550,6 +579,9 @@ ANIMATION PROC
     cmp cx, 3
     jz FALLINGFrame
 
+    cmp cx, 4
+    jz DEADSpr
+
     cmp dx, 8
     jl Frame1
 
@@ -576,10 +608,16 @@ ANIMATION PROC
         call DRAWSPRITE
         jmp QuitFrame
 
+    DEADSpr:
+        lea si, DEAD
+        call DRAWSPRITE
+        jmp QuitFrame
+
     DefaultFrame:
         lea si, IDLE
         call DRAWSPRITE
         jmp QuitFrame
+
 
     QuitFrame:
     mov STATE, 0
@@ -674,6 +712,81 @@ TILEMAPEDITOR PROC
     RET
 TILEMAPEDITOR ENDP
 
+DRAWENTITY PROC
+    lea si, Entities
+    mov cx, NoOfEnt
+    mov EntityOffset, 0
+
+    EntityLoop:
+        
+        push cx
+        mov ax, [si]
+        sub ax, SCROLLX
+
+        cmp ax, 168
+        jg skipentity
+
+        cmp ax, -168
+        jl skipentity
+
+        add ax, 160
+        mov Obj_X, ax
+        mov ax, [si + 2]
+        mov Obj_Y, ax
+        call ENTITYCOLLISION
+
+
+        push si
+        mov si, [si + 4]
+        call DRAWSPRITE
+        pop si
+
+        skipentity:
+        add si, 7
+        pop cx
+        loop EntityLoop
+    
+    ret
+DRAWENTITY ENDP
+
+ENTITYCOLLISION PROC
+    
+    mov ax, SYSRA_X
+    sub ax, 6        
+    mov bx, SYSRA_X
+    add bx, 6        
+
+    mov cx, Obj_X
+    sub cx, 8        
+    mov dx, Obj_X
+    add dx, 8        
+
+    cmp bx, cx        
+    jl QuitCollisioncheck
+    cmp ax, dx        
+    jg QuitCollisioncheck
+
+    
+    mov ax, SYSRA_Y
+    sub ax, 12       
+    mov bx, SYSRA_Y  
+
+    mov cx, Obj_Y
+    sub cx, 10      
+    mov dx, Obj_Y    
+
+    
+    cmp bx, cx        
+    jl QuitCollisioncheck
+    cmp ax, dx        
+    jg QuitCollisioncheck
+    
+    mov PLAYERDEAD, 1
+
+    QuitCollisioncheck:
+    ret
+ENTITYCOLLISION ENDP
+
 SWAPVGABUFFER PROC
     push ds
     mov cx, 320 * 100  ; 64,000 pixels to copy
@@ -683,8 +796,8 @@ SWAPVGABUFFER PROC
     mov ax, 0A000h     ; VGA memory segment
     mov es, ax         ; Set ES to VGA
 
-    mov ax, FrameBuffer     ; Off-screen buffer segment
-    mov ds, ax         ; Set DS to our buffer
+    mov ax, FrameBuffer  ; Off-screen buffer segment
+    mov ds, ax          ; Set DS to our buffer
 
     rep movsw       
 
