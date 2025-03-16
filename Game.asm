@@ -13,8 +13,7 @@ Entity STRUC
     ;|||||||+--- Bit 1: Direction (1 = Up, 0 = Down)
     ;||||||+---- Bit 2: Side (1 = +, 0 = -)
     ;|||||+----- Bit 3: Collision (1 = no collision, 0 = collision)
-    ;||||+------ Bit 4: speed
-
+    ;||||+------ Bit 4: frame 
     ;11
 Entity ENDS
 
@@ -66,8 +65,8 @@ Entity ENDS
 
     SPIKE DW 00h, 00h, 00h, 00h, 00h, 00h, 00h, 01818h, 01818h, 02C2Ch, 02C2Ch, 02C2Ch, 04E4Eh, 04E4Eh, 0FFFFh, 08001h
 
-    ENEMYHORN1 DW 00h, 00h, 00h, 0810h, 01008h, 01818h, 01BD8h, 07E0h, 01FF8h, 01FF8h, 013C8h, 013C8h, 0FF0h, 01248h, 01018h, 01800h
-    ENEMYHORN2 DW 00h, 00h, 00h, 0810h, 01008h, 01818h, 01BD8h, 07E0h, 01FF8h, 01FF8h, 013C8h, 013C8h, 0FF0h, 01248h, 01808h, 018h
+    ENEMYHORN1 DW 00h, 00h, 00h, 00h, 00h, 03C0h, 0FF0h, 01FF8h, 01FF8h, 01FF8h, 013C8h, 013C8h, 0FF0h, 01248h, 01018h, 01800h
+    ENEMYHORN2 DW 00h, 00h, 00h, 00h, 00h, 03C0h, 0FF0h, 01FF8h, 01FF8h, 01FF8h, 013C8h, 013C8h, 0FF0h, 01248h, 01808h, 018h
 
     FLYINGENEMY1 DW 00h, 00h, 00h, 00h, 04002h, 063C6h, 077EEh, 057EAh, 06FF6h, 0990h, 02994h, 06FF6h, 04242h, 00h, 00h, 00h
     FLYINGENEMY2 DW 00h, 00h, 00h, 00h, 03C0h, 07E0h, 077EEh, 0FF0h, 0990h, 02994h, 02FF4h, 01248h, 00h, 00h, 00h, 00h
@@ -119,17 +118,21 @@ Entity ENDS
 
     
     LEVEL DW 0FFE0h, 00020h, 00020h, 00020h, 00020h, 00020h, 00020h, 00030h, 00000h, 00000h
-        DW 00030h, 00020h, 00020h, 00020h, 00020h, 00020h, 00020h, 00020h, 00030h, 00000h
-        DW 00100h, 00100h, 00100h, 00000h, 00000h, 00100h, 00000h, 00000h, 00100h, 00100h
-        DW 00100h, 00000h, 00000h, 00000h, 00030h, 00020h, 00020h, 00020h, 00020h, 00020h
-        DW 00020h, 00060h, 000C0h, 00180h, 00300h, 00200h, 00200h, 00200h, 00200h, 00200h
-        DW 00200h, 003F0h, 00000h, 00000h, 00000h, 00200h, 00000h, 00000h, 00000h, 00200h
-        DW 00000h, 00000h, 00000h, 00200h, 00000h, 00000h, 00000h, 00200h, 00000h, 00000h
-        DW 00000h, 003F0h, 00200h, 00200h, 00200h, 00200h, 00200h, 00200h, 00300h, 00180h
-        DW 000C0h, 00060h, 00020h, 00020h, 00020h, 00020h, 00020h, 00020h, 00020h, 00020h
-        DW 00020h, 00020h, 00020h, 00020h, 00020h, 00020h, 00020h, 00020h, 00020h, 00020h
-        DW 00020h, 00020h, 00020h, 00020h, 00020h, 00020h, 00020h, 0FFE0h
-        
+      DW 00030h, 00020h, 00020h, 00020h, 00020h, 00020h, 00020h, 00020h, 00030h, 00000h
+      DW 00100h, 00100h, 00100h, 00000h, 00000h, 00100h, 00000h, 00000h, 00100h, 00100h
+      DW 00100h, 00000h, 00000h, 00000h, 00030h, 00020h, 00020h, 00020h, 00020h, 00020h
+      DW 00020h, 00060h, 000C0h, 00180h, 00300h, 00200h, 00200h, 00200h, 00200h, 00200h
+      DW 00200h, 003F0h, 00000h, 00000h, 00000h, 00200h, 00000h, 00000h, 00000h, 00200h
+      DW 00000h, 00000h, 00000h, 00200h, 00000h, 00000h, 00000h, 00200h, 00000h, 00000h
+      DW 00000h, 003F0h, 00200h, 00200h, 00200h, 00200h, 00200h, 00200h, 00300h, 00180h
+      DW 000C0h, 00060h, 00020h, 00020h, 00020h, 00020h, 00020h, 00020h, 00020h, 00020h
+      DW 00020h, 00020h, 00020h, 00020h, 00020h, 00020h, 00020h, 00020h, 00020h, 00020h
+      DW 00020h, 00020h, 00020h, 00020h, 00020h, 00020h, 00020h, 001E0h, 00100h, 00100h
+      DW 00100h, 00100h, 00100h, 001F0h, 00000h, 00000h, 00000h, 00000h, 00000h, 00000h
+      DW 00000h, 00000h, 00000h, 00000h, 00000h, 00000h, 00000h, 00000h, 00000h, 00000h
+      DW 00000h, 001F0h, 00100h, 00100h, 00100h, 00100h, 00100h, 00100h, 00100h, 001E0h
+      DW 00020h, 00020h, 00020h, 00020h, 00020h, 00020h, 00020h, 00020h, 00020h, 00020h
+      DW 00020h, 00020h, 0FFE0h
     TILES DW OFFSET RIGHT, OFFSET RIGHT, OFFSET RIGHT, OFFSET RIGHT, OFFSET RIGHT, OFFSET RIGHT, OFFSET RIGHT, OFFSET RIGHT, OFFSET RIGHT, OFFSET RIGHT
         DW OFFSET TRC, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOPRIGHT, OFFSET RIGHT, OFFSET TOPLEFT
         DW OFFSET LEFT, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOPRIGHT, OFFSET RIGHT
@@ -141,9 +144,12 @@ Entity ENDS
         DW OFFSET TOP, OFFSET TOPRIGHT, OFFSET TRC, OFFSET TOPRIGHT, OFFSET TRC, OFFSET TOPRIGHT, OFFSET TRC, OFFSET TOPRIGHT, OFFSET TRC, OFFSET TOP
         DW OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP
         DW OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP
-        DW OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET LEFT, OFFSET LEFT, OFFSET LEFT, OFFSET LEFT, OFFSET LEFT, OFFSET LEFT
-        DW OFFSET LEFT, OFFSET LEFT, OFFSET LEFT, OFFSET LEFT, OFFSET TLC
-    
+        DW OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOPLEFT, OFFSET LEFT, OFFSET LEFT, OFFSET TLC, OFFSET TOP, OFFSET TOP
+        DW OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOPRIGHT, OFFSET RIGHT, OFFSET RIGHT, OFFSET RIGHT, OFFSET RIGHT, OFFSET TOPLEFT, OFFSET LEFT
+        DW OFFSET LEFT, OFFSET LEFT, OFFSET LEFT, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP
+        DW OFFSET TOPRIGHT, OFFSET RIGHT, OFFSET RIGHT, OFFSET TRC, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP
+        DW OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET TOP, OFFSET LEFT, OFFSET LEFT, OFFSET LEFT, OFFSET LEFT
+        DW OFFSET LEFT, OFFSET LEFT, OFFSET LEFT, OFFSET LEFT, OFFSET LEFT, OFFSET LEFT, OFFSET TLC
     TILEOFFSETINDEX DW 0, 22, 24, 26, 28, 30, 32, 34, 38, 38
                     DW 38, 42, 44, 46, 48, 50, 52, 54, 56, 60
                     DW 60, 62, 64, 66, 66, 66, 68, 68, 68, 70
@@ -154,17 +160,23 @@ Entity ENDS
                     DW 138, 138, 150, 152, 154, 156, 158, 160, 162, 166
                     DW 170, 174, 178, 180, 182, 184, 186, 188, 190, 192
                     DW 194, 196, 198, 200, 202, 204, 206, 208, 210, 212
-                    DW 214, 216, 218, 220, 222, 224, 226, 228, 250
+                    DW 214, 216, 218, 220, 222, 224, 226, 228, 236, 238
+                    DW 240, 242, 244, 246, 256, 256, 256, 256, 256, 256
+                    DW 256, 256, 256, 256, 256, 256, 256, 256, 256, 256
+                    DW 256, 256, 266, 268, 270, 272, 274, 276, 278, 280
+                    DW 288, 290, 292, 294, 296, 298, 300, 302, 304, 306
+                    DW 308, 310, 312, 334
 
 
+    NoOfEnt DW 8
     Entities Entity <56, 160, OFFSET ENEMYHORN1, 0, 50, 11111101b>
              Entity <700, 100, OFFSET FLYINGENEMY1, -10, 50, 11111111b>, <760, 100, OFFSET FLYINGENEMY1, 35, 50, 11111111b>, <820, 100, OFFSET FLYINGENEMY1, -50, 50, 11111111b>
              Entity <890, 100, OFFSET FLYINGENEMY1, 23, 50, 11111111b>, <950, 100, OFFSET FLYINGENEMY1, -43, 50, 11111111b>
-             Entity <1500, 160, OFFSET SPIKE, 0, 50, 00001101b>, <1040, 96, OFFSET SPIKE, 0, 55, 00001101b>
-    NoOfEnt DW 8
+             Entity <1040, 96, OFFSET SPIKE, 0, 55, 00001101b>, <1500, 160, OFFSET SPIKE, 0, 50, 00001100b>
 
-    
-
+    NoOfTileEntity DW 3
+    TileEntities Entity <1784, 120, OFFSET CLOSELEFT, 0, 100, 0001b>, <1800, 120, OFFSET CLOSEM, 0, 100, 0001b>, <1816, 120, OFFSET CLOSERIGHT, 0, 100, 0001b>
+    setSysraOffset dw 0
 .CODE
 
 PUBLIC _FrameUpdate   
@@ -231,19 +243,19 @@ GAMECYCLE PROC
     call RESET
     call INPUT
     call TILEMAPEDITOR
+    call TILEOBJECT
     call PHYSICSUPDATE
     call CLAMPPOS
-    call DRAWENTITY
+    call OBJECTS
     call ANIMATION
-
-    lea si, Frame
-    mov Obj_X, 40
-    mov Obj_Y, 40
-    call DRAWSPRITE
     call PLAYERKILL
     call SWAPVGABUFFER
 
-
+    ;lea si, Frame
+    ;mov Obj_X, 40
+    ;mov Obj_Y, 40
+    ;call DRAWSPRITE
+    
     mov LEFTED, 0
     mov RIGHTED, 0
     mov JUMPEDED, 0
@@ -290,19 +302,10 @@ INPUT PROC
         jmp back
         
     right_arrow:
+        add SYSRA_X, 2
+        jmp FLIPState
 
-        mov ax, SYSRA_X
-        cmp ax, 160
-        jge MOVSCROLL
-
-
-        MOVSYSRA:
-            add SYSRA_X, 2
-            jmp FLIPState
-        MOVSCROLL:
-            add SCROLLX, 2
-            mov SYSRA_X, 160
-            
+        
         FLIPState:   
         mov FLIP, 0
         mov STATE, 1
@@ -311,7 +314,17 @@ INPUT PROC
     jumped_key:
         mov JUMPED, 1
     done:
-        
+        mov ax, SYSRA_X
+        cmp ax, 160
+        jge MOVSCROLL
+        jmp scrollDone
+        MOVSCROLL:
+            mov ax, SYSRA_X
+            sub ax, 160
+            add SCROLLX, ax
+            mov SYSRA_X, 160
+            
+    scrollDone:    
     RET
 Input ENDP
 
@@ -724,10 +737,21 @@ TILEMAPEDITOR PROC
     RET
 TILEMAPEDITOR ENDP
 
-DRAWENTITY PROC
+TILEOBJECT PROC
+    lea si, TileEntities
+    mov cx, NoOfTileEntity
+    call ENTITYCYCLE
+    ret 
+TILEOBJECT ENDP
+
+OBJECTS PROC
     lea si, Entities
     mov cx, NoOfEnt
+    call ENTITYCYCLE
+    ret
+OBJECTS ENDP
 
+ENTITYCYCLE PROC
     EntityLoop:
         
         push cx
@@ -746,7 +770,6 @@ DRAWENTITY PROC
         mov Obj_Y, ax
 
         call ENTITYUPDATE
-        call ENTITYCOLLISION
         call ENTITYANIMATION
         
 
@@ -756,7 +779,7 @@ DRAWENTITY PROC
         loop EntityLoop
     
     ret
-DRAWENTITY ENDP
+ENTITYCYCLE ENDP
 
 ENTITYANIMATION PROC
     mov ax, 0
@@ -806,6 +829,10 @@ ENTITYANIMATION PROC
 
     exitEntityAnimation:
 
+
+
+
+
     ret    
 ENTITYANIMATION ENDP
 
@@ -820,6 +847,7 @@ ENTITYUPDATE PROC
     
     MovePositive:
         add word PTR [si + 6], 1
+        mov setSysraOffset, 1
         mov bx, [si + 8]
         mov cx, [si + 6] 
         cmp bx, cx
@@ -831,6 +859,7 @@ ENTITYUPDATE PROC
 
     MoveNegative:
         sub word PTR [si + 6], 1
+        mov setSysraOffset, -1
         mov bx, [si + 8]
         mov cx, [si + 6] 
         neg bx
@@ -850,13 +879,17 @@ ENTITYUPDATE PROC
     MoveDown:
         mov cx, [si + 6]
         add Obj_X, cx
-        jmp NoMovement
+        jmp exitove
     MoveUp:
         mov cx, [si + 6]
         add Obj_Y, cx
-        jmp NoMovement
+        jmp exitove
     NoMovement:
+        mov setSysraOffset, 0
+    exitove:
 
+
+    call ENTITYCOLLISION
     ret
 ENTITYUPDATE ENDP
 
@@ -883,7 +916,7 @@ ENTITYCOLLISION PROC
     mov bx, SYSRA_Y  
 
     mov cx, Obj_Y
-    sub cx, 10      
+    sub cx, 20
     mov dx, Obj_Y    
 
     
@@ -892,9 +925,19 @@ ENTITYCOLLISION PROC
     cmp ax, dx        
     jg QuitCollisioncheck
     
-    mov PLAYERDEAD, 1
 
+
+    mov al, [si + 10]
+    TEST al, 00001000b  
+    JZ noCollision
+        mov PLAYERDEAD, 1
+        jmp QuitCollisioncheck
+    noCollision:
+        mov ax, setSysraOffset
+        add SYSRA_X, ax
+    
     QuitCollisioncheck:
+
     ret
 ENTITYCOLLISION ENDP
 

@@ -1,4 +1,4 @@
-masm Game.asm;
+    masm Game.asm;
 link Game.obj
 nasm Keyboard.asm -o Keyboard.obj -f obj
 tcc -c -IC:\TURBOC3\INCLUDE -LC:\TURBOC3\LIB SYSRA.c
