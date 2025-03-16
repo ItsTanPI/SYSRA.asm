@@ -769,9 +769,9 @@ ENTITYANIMATION PROC
 
     
     MOV BX, 15
-    MOV AX, Frame  ; Load AX
-CWD            ; Sign-extend AX into DX:AX (sets DX = 0 if AX is positive)
-IDIV BX        ; Safe division
+    MOV AX, Frame  
+    CWD            
+    IDIV BX        
 
     CMP dx, 0
     JNL noneg
