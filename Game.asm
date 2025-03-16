@@ -2,10 +2,12 @@
 .STACK 64h
 
 Entity STRUC
-    X DW ?         
-    Y DW ?       
-    Image DW ?
-    Movement DB ?
+    X DW ?            ;0     
+    Y DW ?            ;2  
+    Image DW ?        ;4
+    PosOffset DW ?    ;6 
+    MaxMovement DW ?  ;8
+    Movement DB ?     ;10
     ;76543210
     ;||||||||+-- Bit 0: Can Move (1 = can move, 0 = cannot move)
     ;|||||||+--- Bit 1: Direction (1 = Up, 0 = Down)
@@ -13,6 +15,7 @@ Entity STRUC
     ;|||||+----- Bit 3: Collision (1 = no collision, 0 = collision)
     ;||||+------ Bit 4: speed
 
+    ;11
 Entity ENDS
 
 
@@ -61,6 +64,13 @@ Entity ENDS
     FALL DW 00h, 00h, 0810h, 0810h, 01818h, 01818h, 0BD0h, 017E8h, 04DB2h, 04DB2h, 02E74h, 0FF0h, 0FF0h, 07E0h, 0810h, 0810h
     DEAD DW 00h, 00h, 00h, 00h, 00h, 00h, 00h, 0408h, 0408h, 0C0Ch, 0C0Ch, 05E8h, 0BF4h, 07F8h, 016E8h, 03718h
 
+    SPIKE DW 00h, 00h, 00h, 00h, 00h, 00h, 00h, 01818h, 01818h, 02C2Ch, 02C2Ch, 02C2Ch, 04E4Eh, 04E4Eh, 0FFFFh, 08001h
+
+    ENEMYHORN1 DW 00h, 00h, 00h, 0810h, 01008h, 01818h, 01BD8h, 07E0h, 01FF8h, 01FF8h, 013C8h, 013C8h, 0FF0h, 01248h, 01018h, 01800h
+    ENEMYHORN2 DW 00h, 00h, 00h, 0810h, 01008h, 01818h, 01BD8h, 07E0h, 01FF8h, 01FF8h, 013C8h, 013C8h, 0FF0h, 01248h, 01808h, 018h
+
+    FLYINGENEMY1 DW 00h, 00h, 00h, 00h, 04002h, 063C6h, 077EEh, 057EAh, 06FF6h, 0990h, 02994h, 06FF6h, 04242h, 00h, 00h, 00h
+    FLYINGENEMY2 DW 00h, 00h, 00h, 00h, 03C0h, 07E0h, 077EEh, 0FF0h, 0990h, 02994h, 02FF4h, 01248h, 00h, 00h, 00h, 00h
 
     ;Sprite Renderer
     Obj_X DW 0
@@ -72,7 +82,6 @@ Entity ENDS
     SPRITEPOINTERY DW 0
     AUXSPRITE DW 0          
     
-    TILEINDEX DW 0
 
     NULL DW 0000h, 0000h, 0000h, 0000h, 0000h, 0000h, 0000h, 0000h, 0000h, 0000h, 0000h, 0000h, 0000h, 0000h, 0000h, 0000h
     LEFT DW 0D800h, 0C000h, 0DC00h, 0DC00h, 0DD00h, 0C000h, 0DB00h, 0DB00h, 0D800h, 0DA00h, 0C000h, 0DC00h, 0DC00h, 0DC00h, 0C000h, 0D800h
@@ -96,7 +105,17 @@ Entity ENDS
     CLOSEBOTTOM DW 0C003h, 0C003h, 0C003h, 0C003h, 0C003h, 0C003h, 0C00Bh, 0C003h, 0C01Bh, 0D01Bh, 0C383h, 0DBBBh, 0DBBBh, 0C003h, 0FFFFh, 0FFFFh
 
 
-    SPIKE DW 00h, 00h, 00h, 00h, 00h, 00h, 00h, 01818h, 01818h, 02C2Ch, 02C2Ch, 02C2Ch, 04E4Eh, 04E4Eh, 0FFFFh, 08001h
+    TILEMAPX DW 0
+    TILEINDEX DW 0
+    
+    TILEPOINTERX DW 0
+    TILEPOINTERY DW 0
+
+    AUXMAP DW 0
+
+    LEFTED DW 0
+    RIGHTED DW 0
+    JUMPEDED DW 0
 
     
     LEVEL DW 0FFE0h, 00020h, 00020h, 00020h, 00020h, 00020h, 00020h, 00030h, 00000h, 00000h
@@ -137,20 +156,13 @@ Entity ENDS
                     DW 194, 196, 198, 200, 202, 204, 206, 208, 210, 212
                     DW 214, 216, 218, 220, 222, 224, 226, 228, 250
 
-    TILEMAPX DW 0
-    
-    TILEPOINTERX DW 0
-    TILEPOINTERY DW 0
 
-    AUXMAP DW 0
+    Entities Entity <56, 160, OFFSET ENEMYHORN1, 0, 50, 11111101b>
+             Entity <700, 100, OFFSET FLYINGENEMY1, -10, 50, 11111111b>, <760, 100, OFFSET FLYINGENEMY1, 35, 50, 11111111b>, <820, 100, OFFSET FLYINGENEMY1, -50, 50, 11111111b>
+             Entity <890, 100, OFFSET FLYINGENEMY1, 23, 50, 11111111b>, <950, 100, OFFSET FLYINGENEMY1, -43, 50, 11111111b>
+             Entity <1500, 160, OFFSET SPIKE, 0, 50, 00001101b>, <1040, 96, OFFSET SPIKE, 0, 55, 00001101b>
+    NoOfEnt DW 8
 
-    LEFTED DW 0
-    RIGHTED DW 0
-    JUMPEDED DW 0
-
-    Entities Entity <56, 160, OFFSET SPIKE, >, <1500, 160, OFFSET SPIKE>
-    NoOfEnt DW 2
-    EntityOffset dw 0
     
 
 .CODE
@@ -224,10 +236,10 @@ GAMECYCLE PROC
     call DRAWENTITY
     call ANIMATION
 
-    ;lea si, Frame
-    ;mov Obj_X, 40
-    ;mov Obj_Y, 40
-    ;call DRAWSPRITE
+    lea si, Frame
+    mov Obj_X, 40
+    mov Obj_Y, 40
+    call DRAWSPRITE
     call PLAYERKILL
     call SWAPVGABUFFER
 
@@ -715,7 +727,6 @@ TILEMAPEDITOR ENDP
 DRAWENTITY PROC
     lea si, Entities
     mov cx, NoOfEnt
-    mov EntityOffset, 0
 
     EntityLoop:
         
@@ -723,31 +734,131 @@ DRAWENTITY PROC
         mov ax, [si]
         sub ax, SCROLLX
 
-        cmp ax, 168
-        jg skipentity
+        ;cmp ax, 168
+        ;jg skipentity
 
-        cmp ax, -168
-        jl skipentity
+        ;cmp ax, -168
+        ;jl skipentity
 
         add ax, 160
         mov Obj_X, ax
         mov ax, [si + 2]
         mov Obj_Y, ax
+
+        call ENTITYUPDATE
         call ENTITYCOLLISION
-
-
-        push si
-        mov si, [si + 4]
-        call DRAWSPRITE
-        pop si
+        call ENTITYANIMATION
+        
 
         skipentity:
-        add si, 7
+        add si, 11
         pop cx
         loop EntityLoop
     
     ret
 DRAWENTITY ENDP
+
+ENTITYANIMATION PROC
+    mov ax, 0
+    MOV al, byte ptr [si + 10]  
+    AND al, 0F0h           
+    MOV CL, 4    ; Load shift count
+    SHR AX, CL   
+    cmp ax, 0
+    je defaultEntity
+
+    
+    MOV BX, 15
+    MOV AX, Frame  ; Load AX
+CWD            ; Sign-extend AX into DX:AX (sets DX = 0 if AX is positive)
+IDIV BX        ; Safe division
+
+    CMP dx, 0
+    JNL noneg
+    NEG dx
+    noneg:
+    CMP dx, 8
+    jle Frame1Entity
+    jmp Frame2Entity
+    
+    Frame1Entity:
+
+    push si
+    mov si, [si + 4]
+    call DRAWSPRITE
+    pop si
+    jmp exitEntityAnimation
+
+    Frame2Entity:
+    push si
+    mov si, [si + 4]
+    add si, 32 
+    call DRAWSPRITE
+    pop si
+    jmp exitEntityAnimation
+
+    defaultEntity:
+    push si
+    mov si, [si + 4]
+    call DRAWSPRITE
+    pop si
+    jmp exitEntityAnimation
+
+    exitEntityAnimation:
+
+    ret    
+ENTITYANIMATION ENDP
+
+ENTITYUPDATE PROC
+    mov al, [si + 10]
+    TEST al, 00000001b  
+    JZ NoMovement            
+
+    TEST AL, 00000100b  
+    JNZ MovePositive        
+    JMP MoveNegative
+    
+    MovePositive:
+        add word PTR [si + 6], 1
+        mov bx, [si + 8]
+        mov cx, [si + 6] 
+        cmp bx, cx
+        jl SwapSidePo
+        jmp directionVe
+        SwapSidePo:
+        XOR BYTE PTR [si + 10], 00000100b  
+        jmp directionVe
+
+    MoveNegative:
+        sub word PTR [si + 6], 1
+        mov bx, [si + 8]
+        mov cx, [si + 6] 
+        neg bx
+        cmp bx, cx
+        jg SwapSideNe
+        jmp directionVe
+        SwapSideNe:
+        XOR BYTE PTR [si + 10], 00000100b
+        jmp directionVe
+    
+    directionVe:
+
+    TEST AL, 00000010b
+    JNZ MoveUp          
+    JMP MoveDown        
+  
+    MoveDown:
+        mov cx, [si + 6]
+        add Obj_X, cx
+        jmp NoMovement
+    MoveUp:
+        mov cx, [si + 6]
+        add Obj_Y, cx
+        jmp NoMovement
+    NoMovement:
+
+    ret
+ENTITYUPDATE ENDP
 
 ENTITYCOLLISION PROC
     
