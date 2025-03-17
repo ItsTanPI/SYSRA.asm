@@ -2,8 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SYSRA.asm</title>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://js-dos.com/cdn/js-dos.js"></script>
+    <link rel="stylesheet" href="https://js-dos.com/cdn/js-dos.css">
     <style>
         html, body {
             height: 100%;
@@ -15,17 +18,167 @@
             width: 100%;
             height: 100%;
         }
+
+        .aspect-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    
+    width: 100vw;
+    height: calc(100vw * (200 / 320)); 
+
+    max-height: 100vh;
+    max-width: calc(100vh * (320 / 200)); 
+        
+    background: rgba(1, 1, 1, 1); 
+    pointer-events: none; 
+}
+
+.hidediv
+{
+    visibility: hidden;
+}
     </style>
     <link rel="stylesheet" href="https://v8.js-dos.com/latest/js-dos.css">
     <script src="https://v8.js-dos.com/latest/js-dos.js"></script>
 </head>
-<body>
+<body style="background-color: black;">
 
-    <div id="dos"></div>
+    <div id="dos" ></div>
+    <div id="we"></div>
+    
 
     <script>
         Dos(document.getElementById("dos"), {url:"SYSRA.zip"})
     </script>
+
+<script>
+    let dosPlayer;
+    var dosCanvas;
+
+    function waitForCanvas(callback) {
+    let checkInterval = setInterval(() => {
+        let canvas = document.querySelector("canvas"); 
+        if (canvas) {
+            console.log("Canvas found:", canvas);
+            dosCanvas = canvas
+            clearInterval(checkInterval); 
+            callback(canvas); 
+        }
+    }, 100); 
+}
+function startApp(canvas) {
+    console.log("DOS Canvas:", canvas);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10);
+    camera.position.z = 1;
+
+    
+    const myDiv = document.getElementById("dos"); 
+    myDiv.classList.add("hidediv"); 
+    const renderer = new THREE.WebGLRenderer({ alpha: true });
+    var gh = document.getElementById("we")
+    gh.classList.add("aspect-overlay"); 
+    renderer.setSize(gh.clientWidth, gh.clientHeight);
+    gh.appendChild(renderer.domElement);
+
+    
+    const geometry = new THREE.PlaneGeometry(2, 2);
+    let texture = new THREE.CanvasTexture(canvas); 
+    texture.needsUpdate = true;
+    
+    const shaderMaterial = new THREE.ShaderMaterial({
+    uniforms: {
+        sceneTexture: { value: texture },  
+        iResolution: { value: new THREE.Vector2(gh.clientWidth, gh.clientHeight) },
+        bloomIntensity: { value: 1.5 }
+    },
+    vertexShader: `void main() { gl_Position = vec4(position, 1.0); }`,
+    fragmentShader: `
+        uniform sampler2D sceneTexture;
+        uniform vec2 iResolution;
+        uniform float bloomIntensity;
+
+        #define CURVATURE 5.0
+        #define BLUR 0.01
+        #define CA_AMT 1.0075
+
+        void main() {
+            vec2 fragCoord = gl_FragCoord.xy;
+            vec2 uv = fragCoord / iResolution.xy;
+
+            // Curving effect
+            vec2 crtUV = uv * 2.0 - 1.0;
+            vec2 offset = crtUV.yx / CURVATURE;
+            crtUV += crtUV * offset * offset;
+            crtUV = crtUV * 0.5 + 0.5;
+            
+            vec2 edge = smoothstep(0.0, BLUR, crtUV) * (1.0 - smoothstep(1.0 - BLUR, 1.0, crtUV));
+
+
+            // Chromatic aberration
+            vec3 color;
+            color.r = texture2D(sceneTexture, (crtUV - 0.5) * CA_AMT + 0.5).r;
+            color.g = texture2D(sceneTexture, crtUV).g;
+            color.b = texture2D(sceneTexture, (crtUV - 0.5) / CA_AMT + 0.5).b;
+            
+            color *= edge.x * edge.y;
+
+            
+            // Bloom effect - Extract brightness and blur
+            float brightness = dot(color, vec3(0.299, 0.587, 0.114)); // Luminance
+            vec3 bloom = vec3(0.0);
+            
+            if (brightness > 0.8) {  // Extract bright areas
+                bloom = color * bloomIntensity; 
+            }
+            
+            //color += bloom; // Add bloom to final color
+            
+            // Scanline effect
+            if (mod(fragCoord.y, 2.0) < 1.0) color *= 0.9;
+            else if (mod(fragCoord.x, 3.0) < 1.0) color *= 0.9;
+            else color *= 1.2;
+            
+            gl_FragColor = vec4(color, 1.0);
+
+
+        }
+    `
+});
+
+
+    const mesh = new THREE.Mesh(geometry, shaderMaterial);
+    scene.add(mesh);
+
+    function captureCanvas() {
+        if (canvas && canvas.width > 0 && canvas.height > 0) {
+            texture.dispose(); 
+            texture = new THREE.CanvasTexture(canvas); 
+            shaderMaterial.uniforms.sceneTexture.value = texture;
+            
+        }
+    }
+
+    function render() {
+        captureCanvas();
+        renderer.render(scene, camera);
+        requestAnimationFrame(render);
+    }
+
+    window.addEventListener("resize", () => {
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        shaderMaterial.uniforms.iResolution.value.set(window.innerWidth, window.innerHeight);
+    });
+
+    render();
+}
+
+
+    waitForCanvas(startApp);
+</script>
 
 </body>
 </html>
