@@ -17,7 +17,6 @@ Entity STRUC
     ;11
 Entity ENDS
 
-
 .DATA
     ;Game
     FrameBuffer DW 0
@@ -213,6 +212,10 @@ _Input PROC FAR
     mov LEFTED, ax
     mov RIGHTED, bx
     mov JUMPEDED, cx
+
+    ifdef dosvga
+
+    endif 
     
     pop bp          
     retf
@@ -263,17 +266,15 @@ GAMECYCLE PROC
 GAMECYCLE ENDP
 
 RESET PROC
-    mov ax, FrameBuffer  
-    mov es, ax      
+    mov ax, FrameBuffer
+    mov es, ax
+    xor di, di 
+    xor ax, ax       
+    
+    mov cx, 32000    
+    rep stosw        
 
-    xor di, di      
-    mov cx, 320 * 200  
-    xor al, al      
-
-    mov ah, 02h     
-    rep stosb   
-
-    RET 
+    RET
 RESET ENDP
 
 INPUT PROC
@@ -468,9 +469,10 @@ PHYSICSUPDATE ENDP
 
 DRAWSPRITE PROC
     ;lea si, RUN1
-    mov ax, 0
-    mov bx, 0
-    mov dx, 0
+    xor ax, ax
+    xor bx, bx
+    xor dx, dx
+
     mov cx, Siz
     mov SPRITEPOINTERY, 0
     mov SPRITEPOINTERX, 0
@@ -480,8 +482,7 @@ DRAWSPRITE PROC
 
         mov SPRITEPOINTERX, 0
         
-        lea di, SPRITEPOINTERY
-        mov bx, [di]
+        mov bx, [SPRITEPOINTERY]
         add bx, bx
         mov bx, [si + bx]
         call FLIPSPRITE
@@ -497,8 +498,7 @@ DRAWSPRITE PROC
             mov cx, Obj_X
             mov dx, Obj_Y
             mov ax, Siz
-            mov bl, 2
-            div bl
+            shr ax, 1
             mov ah, 0
             sub cx, ax
             sub dx, Siz
@@ -901,25 +901,33 @@ ENTITYCOLLISION PROC
     add bx, 6        
 
     mov cx, Obj_X
-    sub cx, 8        
+    sub cx, 6        
     mov dx, Obj_X
-    add dx, 8        
+    add dx, 6        
 
     cmp bx, cx        
     jl QuitCollisioncheck
     cmp ax, dx        
     jg QuitCollisioncheck
 
+    mov al, [si + 10]
+    TEST al, 00001000b  
+    JnZ itsaBlock
+        mov cx, Obj_Y
+        sub cx, 16
+        mov dx, Obj_Y    
+        jmp cf
+    itsaBlock:
+        mov cx, Obj_Y
+        sub cx, 10
+        mov dx, Obj_Y
     
     mov ax, SYSRA_Y
-    sub ax, 12       
+    sub ax, 12
     mov bx, SYSRA_Y  
 
-    mov cx, Obj_Y
-    sub cx, 20
-    mov dx, Obj_Y    
 
-    
+    cf:
     cmp bx, cx        
     jl QuitCollisioncheck
     cmp ax, dx        
@@ -943,20 +951,19 @@ ENTITYCOLLISION ENDP
 
 SWAPVGABUFFER PROC
     push ds
-    mov cx, 320 * 100  ; 64,000 pixels to copy
-    mov si, 0          ; Start of buffer
-    mov di, 0          ; Start of VGA memory
 
-    mov ax, 0A000h     ; VGA memory segment
-    mov es, ax         ; Set ES to VGA
+    mov ax, 0A000h   
+    mov es, ax       
 
-    mov ax, FrameBuffer  ; Off-screen buffer segment
-    mov ds, ax          ; Set DS to our buffer
+    mov ax, FrameBuffer  
+    mov ds, ax       
 
-    rep movsw       
-
-    mov ax, FrameBuffer     ; Off-screen buffer segment
-    mov es, ax         ; Set DS to our buffer
+    xor si, si       
+    xor di, di       
+    mov cx, 32000    
+    
+    cld              
+    rep movsw        
 
     pop ds
     ret

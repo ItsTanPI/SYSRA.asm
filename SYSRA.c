@@ -21,4 +21,6 @@ int main()
 	}
 	Exit();
 	uninstall_key_handler();
+
+	return 0;
 }
