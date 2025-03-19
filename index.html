@@ -93,70 +93,84 @@ function startApp(canvas) {
     uniforms: {
         sceneTexture: { value: texture },  
         iResolution: { value: new THREE.Vector2(gh.clientWidth, gh.clientHeight) },
-        bloomIntensity: { value: 1.5 }
+        bloomIntensity: { value: 1.5 },
+        time: { value: 0.0 }  // Add time uniform
     },
     vertexShader: `void main() { gl_Position = vec4(position, 1.0); }`,
     fragmentShader: `
-        uniform sampler2D sceneTexture;
-        uniform vec2 iResolution;
-        uniform float bloomIntensity;
+    uniform sampler2D sceneTexture;
+    uniform vec2 iResolution;
+    uniform float bloomIntensity;
+    uniform float time;  // Add time for animated noise
 
-        #define CURVATURE 5.0
-        #define BLUR 0.01
-        #define CA_AMT 1.0055
+    #define CURVATURE 5.0
+    #define BLUR 0.01
+    #define CA_AMT 1.0055
 
-        void main() {
-            vec2 fragCoord = gl_FragCoord.xy;
-            vec2 uv = fragCoord / iResolution.xy;
+    // Random noise function
+    float random(vec2 uv) {
+    uv = mod(uv, 100.0); // Keeps values small to avoid precision loss
+    return fract(sin(dot(uv, vec2(127.1, 311.7))) * 43758.5453123);
+}
 
-            // Curving effect
-            vec2 crtUV = uv * 2.0 - 1.0;
-            vec2 offset = crtUV.yx / CURVATURE;
-            crtUV += crtUV * offset * offset;
-            crtUV = crtUV * 0.5 + 0.5;
-            
-            vec2 edge = smoothstep(0.0, BLUR, crtUV) * (1.0 - smoothstep(1.0 - BLUR, 1.0, crtUV));
+    // Noise function with time-based variation
+    float noise(vec2 uv) {
+        uv *= iResolution.xy; // Scale to screen resolution
+        return random(uv + time * 0.5); // Animated noise
+    }
 
+    void main() {
+        vec2 fragCoord = gl_FragCoord.xy;
+        vec2 uv = fragCoord / iResolution.xy;
 
-            // Chromatic aberration
-            vec3 color;
-            color.r = texture2D(sceneTexture, (crtUV - 0.5) * CA_AMT + 0.5).r;
-            color.g = texture2D(sceneTexture, crtUV).g;
-            color.b = texture2D(sceneTexture, (crtUV - 0.5) / CA_AMT + 0.5).b;
-            
-            color *= edge.x * edge.y;
+        // Curving effect
+        vec2 crtUV = uv * 2.0 - 1.0;
+        vec2 offset = crtUV.yx / CURVATURE;
+        crtUV += crtUV * offset * offset;
+        crtUV = crtUV * 0.5 + 0.5;
 
-            
-            // Bloom effect - Extract brightness and blur
-            float brightness = dot(color, vec3(0.299, 0.587, 0.114)); // Luminance
-            //vec3 bloom = vec3(0.0);
-            
-            //if (brightness > 0.8) {  // Extract bright areas
-            //   bloom = color * bloomIntensity; 
-            //}
-            
-            //color += bloom; // Add bloom to final color
-            
-            // Scanline effect
-            if (mod(fragCoord.y, 2.0) < 1.0) color *= 0.9;
-            else if (mod(fragCoord.x, 3.0) < 1.0) color *= 0.9;
-            else color *= 1.2;
-            
-            gl_FragColor = vec4(color, 1.0);
+        vec2 edge = smoothstep(0.0, BLUR, crtUV) * (1.0 - smoothstep(1.0 - BLUR, 1.0, crtUV));
 
+        // Chromatic aberration
+        vec3 color;
+        color.r = texture2D(sceneTexture, (crtUV - 0.5) * CA_AMT + 0.5).r;
+        color.g = texture2D(sceneTexture, crtUV).g;
+        color.b = texture2D(sceneTexture, (crtUV - 0.5) / CA_AMT + 0.5).b;
+        
+        float staticNoise = noise(uv) * 0.115; // 0.3 = Strength of noise
+        color += vec3(staticNoise);
+        color *= edge.x * edge.y;
 
-        }
-    `
+        // --- NOISE EFFECT ---
+
+        // Scanline effect
+        if (mod(fragCoord.y, 2.0) < 1.0) color *= 0.7;
+        else if (mod(fragCoord.x, 3.0) < 1.0) color *= 0.7;
+        else color *= 1.2;
+
+        gl_FragColor = vec4(color, 1.0);
+    }
+`
 });
 
 
     const mesh = new THREE.Mesh(geometry, shaderMaterial);
     scene.add(mesh);
 
+    function animate() 
+    {
+    shaderMaterial.uniforms.time.value += 0.1;  // Increment time
+    requestAnimationFrame(animate);
+}
+
+
     function captureCanvas() {
         if (canvas && canvas.width > 0 && canvas.height > 0) {
             texture.dispose(); 
+            animate();
             texture = new THREE.CanvasTexture(canvas); 
+            //texture.magFilter = THREE.NearestFilter;
+            //texture.minFilter = THREE.NearestFilter;
             shaderMaterial.uniforms.sceneTexture.value = texture;
             
         }
