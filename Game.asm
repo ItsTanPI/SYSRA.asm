@@ -17,6 +17,16 @@ Entity STRUC
     ;11
 Entity ENDS
 
+CheckPoint STRUC
+    CheckPointX DW ?
+    CheckPointY DW ?
+    CheckPointImage DW ?
+    CheckPointSpawnX DW ?
+    CheckPointSpawnPosY DW ?
+    CheckPointScrollX DW ?
+    CheckPointFlag DB ?
+CheckPoint ENDS
+
 .DATA
     ;Game
     FrameBuffer DW 0
@@ -102,6 +112,8 @@ Entity ENDS
     CLOSETOP DW 0FFFFh, 0FFFFh, 0C003h, 0DBBBh, 0DBBBh, 0C03Bh, 0C583h, 0C1A3h, 0C003h, 0C003h, 0C003h, 0C003h, 0C003h, 0C003h, 0C003h, 0C003h
     CLOSEBOTTOM DW 0C003h, 0C003h, 0C003h, 0C003h, 0C003h, 0C003h, 0C00Bh, 0C003h, 0C01Bh, 0D01Bh, 0C383h, 0DBBBh, 0DBBBh, 0C003h, 0FFFFh, 0FFFFh
 
+    CHECKPOINT1 DW 0180h, 07FFEh, 08001h, 0BFFDh, 0BE7Dh, 0BE7Dh, 0BE7Dh, 0BFFDh, 0BE7Dh, 0BFFDh, 08001h, 07FFEh, 00h, 0180h, 0180h, 0180h
+    CHECKPOINT2 DW 0180h, 07FFEh, 08001h, 0BFFDh, 0BC3Dh, 0BBFDh, 0BBFDh, 0BBFDh, 0BC3Dh, 0BFFDh, 08001h, 07FFEh, 00h, 0180h, 0180h, 0180h
 
     TILEMAPX DW 0
     TILEINDEX DW 0
@@ -174,8 +186,15 @@ Entity ENDS
              Entity <1040, 96, OFFSET SPIKE, 0, 55, 00001101b>, <1500, 160, OFFSET SPIKE, 0, 50, 00001100b>
 
     NoOfTileEntity DW 3
+    
     TileEntities Entity <1784, 120, OFFSET CLOSELEFT, 0, 100, 0001b>, <1800, 120, OFFSET CLOSEM, 0, 100, 0001b>, <1816, 120, OFFSET CLOSERIGHT, 0, 100, 0001b>
     setSysraOffset dw 0
+
+    NoOfCheck DW 2
+    CheckPointArray CheckPoint <32, 160, OFFSET CHECKPOINT1, 40, 50, 0, 0>, <750, 80, OFFSET CHECKPOINT1, 760, 50, 0, 0>
+    lastCheckPoint DW CheckPointArray
+
+
 .CODE
 
 PUBLIC _FrameUpdate   
@@ -250,6 +269,7 @@ GAMECYCLE PROC
     call PHYSICSUPDATE
     call CLAMPPOS
     call OBJECTS
+    call CHECKPOINTUPDATE
     call ANIMATION
     call PLAYERKILL
     call SWAPVGABUFFER
@@ -354,10 +374,27 @@ PLAYERKILL PROC
     cmp PLAYERDEAD, 1
     jne dontKill
 
-    mov SYSRA_Y, 50
-    mov SYSRA_x, 50
-    mov SCROLLX, 0
+    mov si, lastCheckPoint
+    
+    mov ax, [si+6]
+    mov bx, [si+8]
+    mov dx, [si+10]
 
+    cmp dx, 0
+    jne noscrollx
+    mov SYSRA_X, ax
+    mov SYSRA_Y, bx
+    mov SCROLLX, dx
+    jmp setvel
+
+    noscrollx:
+    mov SCROLLX, dx
+    mov SYSRA_X, 50
+    mov SYSRA_Y, 50
+
+
+
+    setvel:
     mov SYSRA_VEL_y, 0
     mov FORCEX, 0
     mov FORCEY, 0
@@ -948,6 +985,59 @@ ENTITYCOLLISION PROC
 
     ret
 ENTITYCOLLISION ENDP
+
+CHECKPOINTUPDATE PROC
+
+    lea si, CheckPointArray
+    mov cx, NoOfCheck
+    CheckPointUpdater:
+        push cx
+        mov ax, [si]
+        sub ax, SCROLLX
+        mov bx, [si + 2]
+        mov Obj_X, ax
+        mov Obj_Y, bx
+        push si
+        mov si, [si + 4]
+        call DRAWSPRITE
+        pop si
+        call SPAWNPOINT
+
+        add si, 13
+        pop cx
+    loop CheckPointUpdater
+
+
+    ret
+CHECKPOINTUPDATE ENDP
+
+SPAWNPOINT PROC
+    mov ax, SYSRA_X
+    cmp SCROLLX, 0
+    jne notaddx
+    add ax, SCROLLX
+    notaddx:
+    cmp ax, Obj_X
+    jnge noCheckSpawn
+    mov lastCheckPoint, si
+    push si
+    add si, 4
+    mov bx, OFFSET CHECKPOINT2
+    mov [si], bx
+
+    cmp ax, Obj_X
+    jne noupdateScrollX
+
+    add si, 6
+    mov bx, SCROLLX
+    mov [si], bx
+
+    noupdateScrollX:
+    
+    pop si
+    noCheckSpawn:
+    ret
+SPAWNPOINT ENDP
 
 SWAPVGABUFFER PROC
     push ds
