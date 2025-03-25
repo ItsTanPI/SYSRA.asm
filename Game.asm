@@ -18,13 +18,13 @@ Entity STRUC
 Entity ENDS
 
 CheckPoint STRUC
-    CheckPointX DW ?
-    CheckPointY DW ?
-    CheckPointImage DW ?
-    CheckPointSpawnX DW ?
-    CheckPointSpawnPosY DW ?
-    CheckPointScrollX DW ?
-    CheckPointFlag DB ?
+    CheckPointX DW ?            ;0
+    CheckPointY DW ?            ;2
+    CheckPointImage DW ?        ;4    
+    CheckPointSpawnX DW ?       ;6
+    CheckPointSpawnPosY DW ?    ;8
+    CheckPointScrollX DW ?      ;10
+    CheckPointFlag DB ?         ;12
 CheckPoint ENDS
 
 .DATA
@@ -185,14 +185,14 @@ CheckPoint ENDS
              Entity <890, 100, OFFSET FLYINGENEMY1, 23, 50, 11111111b>, <950, 100, OFFSET FLYINGENEMY1, -43, 50, 11111111b>
              Entity <1040, 96, OFFSET SPIKE, 0, 55, 00001101b>, <1500, 160, OFFSET SPIKE, 0, 50, 00001100b>
 
-    NoOfTileEntity DW 3
+    NoOfTileEntity DW 1
     
-    TileEntities Entity <1784, 120, OFFSET CLOSELEFT, 0, 100, 0001b>, <1800, 120, OFFSET CLOSEM, 0, 100, 0001b>, <1816, 120, OFFSET CLOSERIGHT, 0, 100, 0001b>
+    TileEntities Entity <1800, 120, OFFSET ALLCOVER, 0, 100, 0001b>
     setSysraOffset dw 0
 
-    NoOfCheck DW 2
-    CheckPointArray CheckPoint <32, 160, OFFSET CHECKPOINT1, 40, 50, 0, 0>, <750, 80, OFFSET CHECKPOINT1, 760, 50, 0, 0>
-    lastCheckPoint DW CheckPointArray
+    NoOfCheck DW 3
+    CheckPointArray CheckPoint <32, 160, OFFSET CHECKPOINT1, 48, 128, 0, 0>, <750, 96, OFFSET CHECKPOINT1, 766, 64, 0, 0>, <1750,  112, OFFSET CHECKPOINT1, 1766, 80, 0, 0>
+    lastCheckPoint DW 0
 
 
 .CODE
@@ -208,7 +208,8 @@ _Setup PROC
     INT 10h           
     MOV AX, 0A000h    
     MOV ES, AX 
-    call ALLOCATEFRAMEBUFFER        
+    call ALLOCATEFRAMEBUFFER   
+    mov PLAYERDEAD, 1     
     pop ds             
     retf       
 _Setup ENDP
@@ -378,7 +379,7 @@ PLAYERKILL PROC
     
     mov ax, [si+6]
     mov bx, [si+8]
-    mov dx, [si+10]
+    mov dx, [si+10]; i have no clue why this works it just works i never updated this tho
 
     cmp dx, 0
     jne noscrollx
@@ -390,7 +391,7 @@ PLAYERKILL PROC
     noscrollx:
     mov SCROLLX, dx
     mov SYSRA_X, 50
-    mov SYSRA_Y, 50
+    mov SYSRA_Y, bx
 
 
 
@@ -1002,40 +1003,23 @@ CHECKPOINTUPDATE PROC
         call DRAWSPRITE
         pop si
         call SPAWNPOINT
-
         add si, 13
         pop cx
     loop CheckPointUpdater
-
-
     ret
 CHECKPOINTUPDATE ENDP
 
 SPAWNPOINT PROC
-    mov ax, SYSRA_X
-    cmp SCROLLX, 0
-    jne notaddx
-    add ax, SCROLLX
-    notaddx:
-    cmp ax, Obj_X
-    jnge noCheckSpawn
+    mov ax, [si]
+    mov Obj_X, ax
+    mov ax, SCROLLX
+    add ax, 160
+
+    cmp Obj_X, ax
+    jnle notCrossed
+    mov word ptr [si+4], OFFSET CHECKPOINT2
     mov lastCheckPoint, si
-    push si
-    add si, 4
-    mov bx, OFFSET CHECKPOINT2
-    mov [si], bx
-
-    cmp ax, Obj_X
-    jne noupdateScrollX
-
-    add si, 6
-    mov bx, SCROLLX
-    mov [si], bx
-
-    noupdateScrollX:
-    
-    pop si
-    noCheckSpawn:
+    notCrossed:
     ret
 SPAWNPOINT ENDP
 
