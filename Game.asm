@@ -203,14 +203,16 @@ PUBLIC _Input
 PUBLIC _Exit
 
 _Setup PROC
-    push ds  
+    
     MOV AX, 13h       
     INT 10h           
     MOV AX, 0A000h    
     MOV ES, AX 
+    mov ax, @data
+    mov ds, ax
     call ALLOCATEFRAMEBUFFER   
     mov PLAYERDEAD, 1     
-    pop ds             
+               
     retf       
 _Setup ENDP
 
@@ -232,10 +234,6 @@ _Input PROC FAR
     mov LEFTED, ax
     mov RIGHTED, bx
     mov JUMPEDED, cx
-
-    ifdef dosvga
-
-    endif 
     
     pop bp          
     retf
@@ -290,7 +288,7 @@ RESET PROC
     mov ax, FrameBuffer
     mov es, ax
     xor di, di 
-    xor ax, ax       
+    xor ax, ax  
     
     mov cx, 32000    
     rep stosw        
@@ -506,67 +504,61 @@ PHYSICSUPDATE PROC
 PHYSICSUPDATE ENDP
 
 DRAWSPRITE PROC
-    ;lea si, RUN1
     xor ax, ax
     xor bx, bx
     xor dx, dx
 
     mov cx, Siz
     mov SPRITEPOINTERY, 0
-    mov SPRITEPOINTERX, 0
     ROW:
-        push cx
-        mov cx, Siz
-
+        push cx                  
+        mov cx, Siz              
         mov SPRITEPOINTERX, 0
-        
         mov bx, [SPRITEPOINTERY]
         add bx, bx
         mov bx, [si + bx]
         call FLIPSPRITE
         mov AUXSPRITE, bx
-        mov ax, 00h
-        cmp ax, bx
+        test bx, bx
         jz skipRow
+
         COL:
-            push cx
-            mov bx, AUXSPRITE        
-            test bx, 8000h  
+            push cx                  
+            mov bx, AUXSPRITE
+            test bx, 8000h
             jz zero
             mov cx, Obj_X
             mov dx, Obj_Y
             mov ax, Siz
             shr ax, 1
-            mov ah, 0
+            mov ah, 0                
             sub cx, ax
             sub dx, Siz
 
             add cx, SPRITEPOINTERX
-            CMP CX, 320
-            JGE zero  
-            CMP CX, 0
-            JLE zero 
+            cmp cx, 320
+            jge zero
+            cmp cx, 0
+            jle zero
 
             add dx, SPRITEPOINTERY
-            CMP dX, 200
-            JGE zero  
-            CMP dX, 0
-            JLE zero
+            cmp dx, 200
+            jge zero
+            cmp dx, 0
+            jle zero
 
             call RENDER
 
             zero:
-            shl AUXSPRITE, 1
-            inc SPRITEPOINTERX
-
-            pop cx
+                shl AUXSPRITE, 1        
+                inc SPRITEPOINTERX
+        pop cx                  
         loop COL
-    skipRow:inc SPRITEPOINTERY
-
-    pop cx
+        skipRow: inc SPRITEPOINTERY
+    pop cx                  
     loop ROW
-    
-    RET
+
+    ret
 DRAWSPRITE ENDP
 
 RENDER PROC
