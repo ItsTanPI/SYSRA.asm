@@ -23,9 +23,9 @@ The editor includes:
 - Color: Fully transparent pixels are ignored
 - Colored pixels are mapped to logic values via a color-lookup table
 - Output:
-  - `LEVEL`: Collision data
-  - `TILES`: Label references for tile behavior
-  - `TILEOFFSETINDEX`: Byte offset for logic tiles
+  - `LEVEL`: Level data
+  - `TILES`: Label references for tile
+  - `TILEOFFSETINDEX`: Byte offset for tiles
 
 ---
 

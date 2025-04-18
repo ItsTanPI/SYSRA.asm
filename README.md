@@ -1,8 +1,10 @@
 # SYSRA: 8086 Assembly Platformer
 
-SYSRA is a modular platformer engine written entirely in 8086 assembly language. It is built for maximum control and low-level optimization, simulating modern gameplay systems under the extreme constraints of real-mode DOS programming.
+- SYSRA is a modular platformer engine written entirely in 8086 assembly language. It is built for maximum control and low-level optimization, simulating modern gameplay systems under the extreme constraints of real-mode DOS programming.
 
-SYSRA is more than just a game—it is a fully custom, extensible engine with robust subsystems and a complete pipeline for asset creation, rendering, and gameplay logic.
+- SYSRA is more than just a game—it is a fully custom, extensible engine with robust subsystems and a complete pipeline for asset creation, rendering, and gameplay logic.
+
+- SYSRA was originally made in Unity for the GMTK 2024 game jam and has since become one of my most popular games. The game's lore takes place in the 80s, and to make the experience more accurate, I decided to remake it in 8086 assembly. I also created a prequel to the game to explore more of the story.
 
 ---
 
