@@ -75,7 +75,7 @@ You can try out a playable demo of SYSRA here:
 4. Run in DOSBox or another 8086-compatible environment.
 
 For more details on how the level editor works, check out:  
-[LevelEditor.md](LevelEditor.md)
+[LevelEditor.md](TileEditor\README.md)
 
 ---
 
