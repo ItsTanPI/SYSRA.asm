@@ -63,6 +63,7 @@ These can be changed in the script by editing the `Sprites` dictionary.
 
 ## Example
 
+TileMap:
 ![TileMap](https://github.com/user-attachments/assets/3ba05894-2bc6-493e-b698-74d5d4cc70fe)
 
 Level:
