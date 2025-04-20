@@ -61,6 +61,13 @@ These can be changed in the script by editing the `Sprites` dictionary.
 
 ---
 
+## Example
+TileMap:
+https://github.com/user-attachments/assets/3ba05894-2bc6-493e-b698-74d5d4cc70fe
+
+Level:
+https://github.com/user-attachments/assets/4ea33b2b-e934-4bab-994d-104876c4be2b
+
 ## How to Use
 
 1. Place all your level and tile PNGs in the `Sprites/` folder.
